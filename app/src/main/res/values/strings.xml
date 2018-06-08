@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ClassScheduler</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="students">Students</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="save">Save</string>
+    <string name="title_activity_student_profile">StudentProfile</string>
+    <string name="student_profile">Student Profile</string>
+    <string name="no_classes_added">No classes added</string>
+</resources>
