@@ -2,14 +2,17 @@ package com.example.android.classscheduler;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,24 +30,24 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.Model.Student;
-import com.example.android.classscheduler.Model.StudentLocalDatabase;
-import com.example.android.classscheduler.data.StudentContract;
 import com.example.android.classscheduler.data.StudentContract.StudentEntry;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -58,18 +61,23 @@ public class EditStudentInfo extends AppCompatActivity {
     private int mStudentSex = StudentEntry.SEX_MALE;
 
     // Variable for current student (if editing a student's information)
-    private StudentLocalDatabase mCurrentStudentLocalDatabase;
     private Student mCurrentStudent;
 
     // Boolean variable to keep track of whether user is editing a student or adding a new student
     private boolean isEditStudent;
 
+    // Boolean variable to keep track of whether there is a photo or not
+    private boolean studentHasPhoto;
+
     // Photo capture/selection function constants and variables
     private static final int PICK_PHOTO_GALLERY = 1;
     private static final int CAPTURE_PHOTO = 2;
+    private static final int REQUEST_STORAGE_PERMISSION = 2;
     private Bitmap mBitmap;
     private static final String BITMAP_EXTRA_DATA_CODE = "data";
     private Uri mFirebaseStoragePhotoUri;
+    private String mTempPhotoPath;
+    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.classscheduler.fileprovider";
 
     // Boolean to keep track of changes made to student's info
     private boolean mChangesMade = false;
@@ -81,7 +89,6 @@ public class EditStudentInfo extends AppCompatActivity {
     // Firebase Instances
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
-    private Query mUpdateDatabaseQuery;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mStudentPhotosStorageReference;
 
@@ -102,6 +109,8 @@ public class EditStudentInfo extends AppCompatActivity {
     TextView mAddPhotoLabelTextView;
     @BindView(R.id.add_sign_image_view)
     ImageView mAddPhotoImageView;
+    @BindView(R.id.saving_student_progress_bar)
+    ProgressBar mSavingProgressBar;
 
     // OnTouchListener to listen for user touches on Edit Text views. A touch indicates that
     // a change has probably been made to the info.
@@ -142,7 +151,6 @@ public class EditStudentInfo extends AppCompatActivity {
         mStudentPhotosStorageReference = mFirebaseStorage.getReference().child("student_photos");
 
         // Get intent to see whether we are updating an old student or adding a new student
-        // TODO chance this to Student objects.
         mCurrentStudent = getIntent().getParcelableExtra(StudentListActivity.STUDENT_EXTRA_KEY);
 
         if (mCurrentStudent != null) {
@@ -187,6 +195,7 @@ public class EditStudentInfo extends AppCompatActivity {
             Glide.with(mAddPhotoView.getContext())
                     .load(photoUrl)
                     .into(mAddPhotoView);
+            studentHasPhoto = true;
         }
 
         // Set student sex spinner
@@ -225,8 +234,15 @@ public class EditStudentInfo extends AppCompatActivity {
                                 startActivityForResult(galleryIntent, PICK_PHOTO_GALLERY);
                                 break;
                             case R.id.camera_action:
-                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                startActivityForResult(cameraIntent, CAPTURE_PHOTO);
+//                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                                File photo = new File(Environment.getExternalStorageDirectory(),
+//                                        String.valueOf(System.currentTimeMillis()));
+//                                Uri uri = FileProvider.getUriForFile(EditStudentInfo.this,
+//                                        getPackageName());
+//                                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+//                                cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//                                startActivityForResult(cameraIntent, CAPTURE_PHOTO);
+                                launchCamera();
                                 break;
                             default:
                                 throw new IllegalArgumentException("Invalid menu item selected");
@@ -246,9 +262,62 @@ public class EditStudentInfo extends AppCompatActivity {
     // Helper method to check if the student profile has a photo or not.
     // If so, hide the "+" and "add photo" views
     private void checkIfThereIsStudentPhoto() {
-        if (mBitmap != null) {
+        if (studentHasPhoto) {
             mAddPhotoImageView.setVisibility(View.GONE);
             mAddPhotoLabelTextView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        // Called when you request permission to read and write to external storage
+        switch (requestCode) {
+            case REQUEST_STORAGE_PERMISSION: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // If you get permission, launch the camera
+                    launchCamera();
+                } else {
+                    // If you do not get permission, show a Toast
+                    Toast.makeText(this, "Permission denied.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+
+    private void launchCamera() {
+        // Create the capture image intent
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the temporary File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = BitmapUtils.createTempImageFile(this);
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+
+                // Get the path of the temporary file
+                mTempPhotoPath = photoFile.getAbsolutePath();
+
+                // Get the content URI for the image file
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        FILE_PROVIDER_AUTHORITY,
+                        photoFile);
+
+                // Add the URI so the camera can store the image
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+
+                // Launch the camera activity
+                startActivityForResult(takePictureIntent, CAPTURE_PHOTO);
+            }
         }
     }
 
@@ -262,23 +331,26 @@ public class EditStudentInfo extends AppCompatActivity {
                 Toast.makeText(this, "Error selecting photo.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Save to Firebase Storage
-            //saveStudentPhotoToFirebaseStorage(data);
 
             try {
                 InputStream inputStream = getContentResolver().openInputStream(data.getData());
                 mBitmap = BitmapFactory.decodeStream(inputStream);
                 mAddPhotoView.setImageBitmap(mBitmap);
+                studentHasPhoto = true;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
 
             // Take new photo
         } else if (requestCode == CAPTURE_PHOTO && resultCode == Activity.RESULT_OK) {
-            Bundle extras = data.getExtras();
-            mBitmap = (Bitmap) extras.get(BITMAP_EXTRA_DATA_CODE);
+            //Bundle extras = data.getExtras();
+            //mBitmap = (Bitmap) extras.get(BITMAP_EXTRA_DATA_CODE);
+//            Uri photoUri = data.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            mBitmap = BitmapUtils.resamplePic(this, mTempPhotoPath);
             mAddPhotoView.setImageBitmap(mBitmap);
-            //saveNewStudentPhotoToFirebaseStorage();
+            studentHasPhoto = true;
         }
         checkIfThereIsStudentPhoto();
     }
@@ -362,50 +434,32 @@ public class EditStudentInfo extends AppCompatActivity {
 
     // Helper method for saving student information to database
     private void saveStudent() {
-        // Extract Student information from the edit text views
-        String studentName = mStudentNameEditText.getText().toString().trim();
-        String studentAgeString = mStudentAgeEditText.getText().toString();
-        String studentGradeString = mStudentGradeEditText.getText().toString();
-        String studentClasses = mStudentClassesEditText.getText().toString().trim();
-
         // Check that every required field has been filled in with valid parameters
-        if (!checkUserInputValidity(studentName, studentAgeString, studentGradeString)) {
+        if (!checkUserInputValidity()) {
             return;
-        }
-
-        // ContentValues variable to contain all of the student's information
-        ContentValues values = new ContentValues();
-        values.put(StudentEntry.COLUMN_NAME, studentName);
-        values.put(StudentEntry.COLUMN_AGE, Integer.parseInt(studentAgeString));
-        values.put(StudentEntry.COLUMN_GRADE, Integer.parseInt(studentGradeString));
-        values.put(StudentEntry.COLUMN_SEX, mStudentSex);
-        values.put(StudentEntry.COLUMN_CLASSES, studentClasses);
-
-        // Check if a photo has been taken. If so, convert to byte[] in order to save
-        if (mBitmap != null) {
-            byte[] bitmapByteArray = BitmapUtils.bitmapToByteArray(mBitmap);
-            values.put(StudentEntry.COLUMN_PICTURE, bitmapByteArray);
         }
 
         // Insert the new student info into the database
         if (isEditStudent) {
-            updateStudent(values);
+            updateStudentOnFirebaseDatabase();
         } else {
             // Make a unique id for the student
-            String randomId = UUID.randomUUID().toString();
-            saveNewStudent(values, randomId);
+            String studentId = UUID.randomUUID().toString();
+            saveNewStudentToFirebaseDatabase(studentId);
         }
     }
 
     // Save the student photo to the Firebase Storage when the Student info is saved
-    private Uri saveStudentPhotoToFirebaseStorage(final String randomId) {
+    private void saveStudentPhotoToFirebaseStorage(final String studentId) {
+        // Show progress bar
+        mSavingProgressBar.setVisibility(View.VISIBLE);
+
         // Save photo to firebase storage
-        final StorageReference photoRef = mStudentPhotosStorageReference.child(randomId);
+        final StorageReference photoRef = mStudentPhotosStorageReference.child(studentId);
         photoRef.putBytes(BitmapUtils.bitmapToByteArray(mBitmap)).addOnSuccessListener(
                 new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri uri1;
                 photoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
@@ -420,19 +474,20 @@ public class EditStudentInfo extends AppCompatActivity {
                         String studentClasses = mStudentClassesEditText.getText().toString().trim();
 
                         Student newStudent = new Student(studentName, studentSex, studentAge, studentGrade,
-                                studentClasses, studentPhoto, randomId);
+                                studentClasses, studentPhoto, studentId);
 
-                        mDatabaseReference.child(randomId).setValue(newStudent);
+                        mDatabaseReference.child(studentId).setValue(newStudent);
+
+                        finish();
                     }
                 });
             }
         });
-
-        return mFirebaseStoragePhotoUri;
     }
 
-    private void saveNewStudentToFirebaseDatabase(String randomId) {
-        // Extract StudentLocalDatabase information from the edit text views
+    // Method to save a new student to the Firebase Database
+    private void saveNewStudentToFirebaseDatabase(String studentId) {
+        // Extract Student information from the edit text views
         String studentName = mStudentNameEditText.getText().toString().trim();
         int studentSex = mStudentSex;
         int studentAge = Integer.parseInt(mStudentAgeEditText.getText().toString());
@@ -441,57 +496,19 @@ public class EditStudentInfo extends AppCompatActivity {
 
         if (mBitmap != null) {
             // Save photo to Firebase Storage using AsyncTask
-            //String[] name = new String[]{studentName};
-            //new SavePhotoToStorageTask().execute(name);
-            saveStudentPhotoToFirebaseStorage(randomId);
+            saveStudentPhotoToFirebaseStorage(studentId);
         } else {
             Student newStudent = new Student(studentName, studentSex, studentAge, studentGrade,
-                    studentClasses, null, randomId);
+                    studentClasses, null, studentId);
 
-            mDatabaseReference.child(randomId).setValue(newStudent);
-        }
-    }
-
-    // Helper method for saving a new student's information
-    private void saveNewStudent(ContentValues values, String randomId) {
-        saveNewStudentToFirebaseDatabase(randomId);
-        Uri newUri = getContentResolver().insert(StudentContract.StudentEntry.CONTENT_URI, values);
-
-        // Toast message informing whether the insertion was successful or not
-        if (newUri == null) {
-            Toast.makeText(this, "Error saving student.", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "StudentLocalDatabase saved successfully.", Toast.LENGTH_SHORT).show();
+            mDatabaseReference.child(studentId).setValue(newStudent);
         }
 
         // Close activity
         finish();
     }
 
-    // Helper method for updating an existing student's information
-    private void updateStudent(ContentValues values) {
-        updateStudentOnFirebaseDatabase();
-//        Uri.Builder currentStudentUri = new Uri.Builder();
-//        Uri updateUri = currentStudentUri.scheme("content")
-//                .authority(StudentContract.CONTENT_AUTHORITY)
-//                .appendPath(StudentContract.PATH_STUDENTS)
-//                .appendPath(String.valueOf(mCurrentStudentLocalDatabase.getStudentId()))
-//                .build();
-//        int rowsUpdated = getContentResolver().update(updateUri, values, null, null);
-//
-//        String toastMessage;
-//        if (rowsUpdated == 0) {
-//            toastMessage = "Save Failed";
-//        } else {
-//            toastMessage = "Saved Successfully";
-//        }
-//
-//        Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
-
-        // Close activity
-        finish();
-    }
-
+    // Update existing student's information on the Firebase Database
     private void updateStudentOnFirebaseDatabase() {
         String studentName = mStudentNameEditText.getText().toString().trim();
         int studentSex = mStudentSex;
@@ -503,30 +520,47 @@ public class EditStudentInfo extends AppCompatActivity {
         if (mBitmap != null) {
             saveStudentPhotoToFirebaseStorage(studentId);
         } else {
+            // Check if the student already has a photo saved
+            String photoUrl;
+            if (studentHasPhoto) {
+                // if has photo, resave the photo to the student database
+                photoUrl = mCurrentStudent.getPhotoUrl();
+            } else {
+                photoUrl = null;
+            }
+
             mFirebaseDatabase.getReference().child("students").child(studentId)
                     .setValue(new Student(studentName, studentSex, studentAge, studentGrade,
-                            studentClasses, null, studentId));
+                            studentClasses, photoUrl, studentId));
+
+            // Close activity
+            finish();
         }
     }
 
     // Helper method to check that the user's input for each field is valid
-    private boolean checkUserInputValidity(String studentName, String studentAgeString, String studentGradeString) {
+    private boolean checkUserInputValidity() {
+        // Extract Student information from the edit text views
+        String studentName = mStudentNameEditText.getText().toString().trim();
+        String studentAgeString = mStudentAgeEditText.getText().toString();
+        String studentGradeString = mStudentGradeEditText.getText().toString();
+
         // Check for valid student name
         if (TextUtils.isEmpty(studentName)) {
-            Toast.makeText(this, "Please enter valid name.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter a valid name.", Toast.LENGTH_SHORT).show();
             mStudentNameEditText.requestFocus();
             return false;
         }
 
         // Check for valid student age
         if (TextUtils.isEmpty(studentAgeString)) {
-            Toast.makeText(this, "Please enter valid age.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
             mStudentAgeEditText.requestFocus();
             return false;
         } else {
             int studentAge = Integer.parseInt(studentAgeString);
             if (studentAge <= 0) {
-                Toast.makeText(this, "Please enter valid age.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
                 mStudentAgeEditText.requestFocus();
                 return false;
             }
@@ -534,13 +568,13 @@ public class EditStudentInfo extends AppCompatActivity {
 
         // Check for valid student grade
         if (TextUtils.isEmpty(studentGradeString)) {
-            Toast.makeText(this, "Please enter valid grade.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter a valid grade.", Toast.LENGTH_SHORT).show();
             mStudentGradeEditText.requestFocus();
             return false;
         } else {
             int studentGrade = Integer.parseInt(studentGradeString);
             if (studentGrade <= 0) {
-                Toast.makeText(this, "Please enter valid grade.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please enter a valid grade.", Toast.LENGTH_SHORT).show();
                 mStudentGradeEditText.requestFocus();
                 return false;
             }

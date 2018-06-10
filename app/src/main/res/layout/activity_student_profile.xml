@@ -16,7 +16,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
-        android:src="@drawable/gray_circle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,6 +25,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         app:srcCompat="@drawable/ic_baseline_add_24px"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/student_profile_picture_view"
         app:layout_constraintEnd_toStartOf="@+id/student_profile_picture_view"
         app:layout_constraintStart_toEndOf="@+id/student_profile_picture_view"
@@ -39,6 +39,7 @@
         android:layout_marginBottom="8dp"
         android:text="@string/add_photo"
         android:textColor="@android:color/black"
+        android:visibility="invisible"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/student_profile_picture_view"
         app:layout_constraintEnd_toEndOf="@+id/student_profile_picture_view"
@@ -101,6 +102,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
+            android:paddingLeft="16dp"
             android:paddingStart="16dp"
             android:text="Sex"
             android:textSize="@dimen/label_text_size" />

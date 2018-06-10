@@ -69,13 +69,14 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.StudentA
         holder.studentSexTV.setText(studentSexString);
         holder.studentAgeTV.setText(String.valueOf(studentAge));
 
+        // TODO Fix discrepancy in profile picture sizes (anon pic and real pic)
         // Put a student picture if it exist
         if (!TextUtils.isEmpty(studentPictureUrl)) {
             Glide.with(holder.studentPictureIV.getContext())
                     .load(studentPictureUrl)
                     .into(holder.studentPictureIV);
         } else {
-            holder.studentPictureIV.setImageResource(R.drawable.ic_baseline_account_circle_48px);
+            holder.studentPictureIV.setImageResource(R.drawable.ic_baseline_account_circle_24px);
         }
     }
 

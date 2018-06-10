@@ -2,10 +2,9 @@ package com.example.android.classscheduler;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,17 +18,32 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.Model.Student;
-import com.example.android.classscheduler.Model.StudentLocalDatabase;
-import com.example.android.classscheduler.data.StudentContract;
 import com.example.android.classscheduler.data.StudentContract.StudentEntry;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class StudentProfile extends AppCompatActivity {
 
+    //TODO bug: app crashes when deleting a profile with no photo
+
     // Member variables
     private Student mCurrentStudent;
+    private String mStudentId;
+
+    // Firebase instances
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mStudentDatabaseReference;
+    private FirebaseStorage mFirebaseStorage;
+    private StorageReference mPhotoStorageReference;
 
     // Views
     @BindView(R.id.student_profile_picture_view)
@@ -62,10 +76,33 @@ public class StudentProfile extends AppCompatActivity {
 
         // Retrieve the data sent with the intent
         Intent intent = getIntent();
-        mCurrentStudent = intent.getParcelableExtra(StudentListActivity.STUDENT_EXTRA_KEY);
+        mStudentId = intent.getStringExtra(StudentListActivity.STUDENT_ID_EXTRA_KEY);
+    }
+
+    @Override
+    protected void onResume() {
+        Timber.d("onresume called");
+        super.onResume();
+
+        // Initialize Firebase instances
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mStudentDatabaseReference = mFirebaseDatabase.getReference()
+                .child("students")
+                .child(mStudentId);
 
         //Populate the views with student data
-        populateViews();
+        mStudentDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mCurrentStudent = dataSnapshot.getValue(Student.class);
+                populateViews();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -85,7 +122,7 @@ public class StudentProfile extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.delete_action:
-                //showDeleteDialog();
+                showDeleteDialog();
                 break;
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
@@ -97,56 +134,50 @@ public class StudentProfile extends AppCompatActivity {
     }
 
     // Prompt user to confirm student deletion
-//    private void showDeleteDialog() {
-//        // Create an AlertDialog.Builder and set the message and click listeners for the positive
-//        // and negative buttons.
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setMessage("Are you sure you want to permanently delete this student?");
-//
-//        // Delete
-//        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                deleteStudent();
-//            }
-//        });
-//
-//        // Don't delete
-//        builder.setNegativeButton("Return", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                if (dialog != null) {
-//                    dialog.dismiss();
-//                }
-//            }
-//        });
-//
-//        // Create and show AlertDialog
-//        AlertDialog alertDialog = builder.create();
-//        alertDialog.show();
-//    }
+    private void showDeleteDialog() {
+        // Create an AlertDialog.Builder and set the message and click listeners for the positive
+        // and negative buttons.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to permanently delete this student?");
 
-//    // Delete student from the database
-//    private void deleteStudent() {
-//        Uri.Builder currentStudentUri = new Uri.Builder();
-//        Uri deletionUri = currentStudentUri.scheme("content")
-//                .authority(StudentContract.CONTENT_AUTHORITY)
-//                .appendPath(StudentContract.PATH_STUDENTS)
-//                .appendPath(String.valueOf(mCurrentStudentLocalDatabase.getStudentId()))
-//                .build();
-//        int rowsDeleted = getContentResolver().delete(deletionUri, null, null);
-//
-//        String toastMessage;
-//        if (rowsDeleted == 0) {
-//            toastMessage = "Deletion failed";
-//        } else {
-//            toastMessage = "StudentLocalDatabase successfully deleted";
-//        }
-//        Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
-//
-//        // Close activity
-//        finish();
-//    }
+        // Delete
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteStudent();
+            }
+        });
+
+        // Don't delete
+        builder.setNegativeButton("Return", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    // Delete student from the database
+    private void deleteStudent() {
+        // Delete student from Firebase database
+        mStudentDatabaseReference.removeValue();
+
+        // Delete Student's photo from Firebase storage
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mPhotoStorageReference = mFirebaseStorage.getReferenceFromUrl(mCurrentStudent.getPhotoUrl());
+        mPhotoStorageReference.delete();
+
+        Toast.makeText(StudentProfile.this, "Student Deleted", Toast.LENGTH_SHORT).show();
+
+        // Close activity
+        finish();
+    }
 
     private void populateViews() {
         // Extract data from the StudentLocalDatabase object
@@ -186,6 +217,11 @@ public class StudentProfile extends AppCompatActivity {
             // Hide the Add Photo image and text
             mPlusImageView.setVisibility(View.GONE);
             mAddPhotoTextView.setVisibility(View.GONE);
+        } else {
+            // Show "add picture" views
+            mStudentPictureView.setImageResource(R.drawable.gray_circle);
+            mPlusImageView.setVisibility(View.VISIBLE);
+            mAddPhotoTextView.setVisibility(View.VISIBLE);
         }
 
     }
