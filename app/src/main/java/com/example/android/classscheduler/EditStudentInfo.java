@@ -72,9 +72,7 @@ public class EditStudentInfo extends AppCompatActivity {
     // Photo capture/selection function constants and variables
     private static final int PICK_PHOTO_GALLERY = 1;
     private static final int CAPTURE_PHOTO = 2;
-    private static final int REQUEST_STORAGE_PERMISSION = 2;
     private Bitmap mBitmap;
-    private static final String BITMAP_EXTRA_DATA_CODE = "data";
     private Uri mFirebaseStoragePhotoUri;
     private String mTempPhotoPath;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.classscheduler.fileprovider";
@@ -234,14 +232,6 @@ public class EditStudentInfo extends AppCompatActivity {
                                 startActivityForResult(galleryIntent, PICK_PHOTO_GALLERY);
                                 break;
                             case R.id.camera_action:
-//                                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                                File photo = new File(Environment.getExternalStorageDirectory(),
-//                                        String.valueOf(System.currentTimeMillis()));
-//                                Uri uri = FileProvider.getUriForFile(EditStudentInfo.this,
-//                                        getPackageName());
-//                                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-//                                cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//                                startActivityForResult(cameraIntent, CAPTURE_PHOTO);
                                 launchCamera();
                                 break;
                             default:
@@ -268,42 +258,20 @@ public class EditStudentInfo extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        // Called when you request permission to read and write to external storage
-        switch (requestCode) {
-            case REQUEST_STORAGE_PERMISSION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // If you get permission, launch the camera
-                    launchCamera();
-                } else {
-                    // If you do not get permission, show a Toast
-                    Toast.makeText(this, "Permission denied.", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
-        }
-    }
-
     private void launchCamera() {
-        // Create the capture image intent
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        // Ensure that there's a camera activity to handle the intent
+        // Check for camera on phone
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the temporary File where the photo should go
+            // Temporary file to hold image
             File photoFile = null;
             try {
                 photoFile = BitmapUtils.createTempImageFile(this);
             } catch (IOException ex) {
-                // Error occurred while creating the File
                 ex.printStackTrace();
             }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
 
+            if (photoFile != null) {
                 // Get the path of the temporary file
                 mTempPhotoPath = photoFile.getAbsolutePath();
 
@@ -343,12 +311,7 @@ public class EditStudentInfo extends AppCompatActivity {
 
             // Take new photo
         } else if (requestCode == CAPTURE_PHOTO && resultCode == Activity.RESULT_OK) {
-            //Bundle extras = data.getExtras();
-            //mBitmap = (Bitmap) extras.get(BITMAP_EXTRA_DATA_CODE);
-//            Uri photoUri = data.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            mBitmap = BitmapUtils.resamplePic(this, mTempPhotoPath);
+            mBitmap = BitmapFactory.decodeFile(mTempPhotoPath);
             mAddPhotoView.setImageBitmap(mBitmap);
             studentHasPhoto = true;
         }

@@ -33,8 +33,6 @@ import timber.log.Timber;
 
 public class StudentProfile extends AppCompatActivity {
 
-    //TODO bug: app crashes when deleting a profile with no photo
-
     // Member variables
     private Student mCurrentStudent;
     private String mStudentId;
@@ -168,10 +166,12 @@ public class StudentProfile extends AppCompatActivity {
         // Delete student from Firebase database
         mStudentDatabaseReference.removeValue();
 
-        // Delete Student's photo from Firebase storage
-        mFirebaseStorage = FirebaseStorage.getInstance();
-        mPhotoStorageReference = mFirebaseStorage.getReferenceFromUrl(mCurrentStudent.getPhotoUrl());
-        mPhotoStorageReference.delete();
+        // Delete Student's photo from Firebase storage (only if photo exists)
+        if (!TextUtils.isEmpty(mCurrentStudent.getPhotoUrl())) {
+            mFirebaseStorage = FirebaseStorage.getInstance();
+            mPhotoStorageReference = mFirebaseStorage.getReferenceFromUrl(mCurrentStudent.getPhotoUrl());
+            mPhotoStorageReference.delete();
+        }
 
         Toast.makeText(StudentProfile.this, "Student Deleted", Toast.LENGTH_SHORT).show();
 
