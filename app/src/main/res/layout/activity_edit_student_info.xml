@@ -74,8 +74,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:hint="Jon B."
             android:inputType="textPersonName"
-            android:hint="John G."
             android:textSize="@dimen/student_edit_text_size" />
 
     </LinearLayout>
@@ -114,7 +114,7 @@
     <LinearLayout
         android:id="@+id/linearLayout4"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/input_views_height"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -128,19 +128,38 @@
             android:id="@+id/student_age_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:paddingStart="16dp"
-            android:text="Age"
+            android:text="Birthdate"
             android:textSize="@dimen/label_text_size" />
 
-        <EditText
-            android:id="@+id/student_age_edit_text"
+        <RelativeLayout
+            android:id="@+id/student_birthdate_relative_layout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="2"
-            android:inputType="number"
-            android:hint="6"
-            android:textSize="@dimen/student_edit_text_size" />
+            android:onClick="openDatePicker">
+
+            <TextView
+                android:id="@+id/student_birthdate_text_view"
+                android:paddingLeft="4dp"
+                android:textSize="@dimen/label_text_size"
+                tools:text="August 13, 1991"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:paddingEnd="12dp"
+                android:scaleType="fitEnd"
+                app:srcCompat="@drawable/ic_baseline_calendar_today_24px" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 
@@ -171,8 +190,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:inputType="number"
             android:hint="1"
+            android:inputType="number"
             android:textSize="@dimen/student_edit_text_size" />
     </LinearLayout>
 
@@ -202,16 +221,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:hint="Science, Math"
             android:inputType="textMultiLine"
             android:maxLines="3"
-            android:hint="Science, Math"
             android:textSize="@dimen/student_edit_text_size" />
 
     </LinearLayout>
 
     <ProgressBar
         android:id="@+id/saving_student_progress_bar"
-        android:visibility="gone"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -219,6 +237,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

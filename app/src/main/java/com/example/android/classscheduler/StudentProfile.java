@@ -33,6 +33,9 @@ import timber.log.Timber;
 
 public class StudentProfile extends AppCompatActivity {
 
+    // Constants
+    public static final String STUDENT_EXTRA_KEY = "student-extra-key";
+
     // Member variables
     private Student mCurrentStudent;
     private String mStudentId;
@@ -116,7 +119,7 @@ public class StudentProfile extends AppCompatActivity {
             case R.id.edit_action:
                 // Intent to open EditStudentInfo activity
                 Intent intent = new Intent(this, EditStudentInfo.class);
-                intent.putExtra(StudentListActivity.STUDENT_EXTRA_KEY, mCurrentStudent);
+                intent.putExtra(STUDENT_EXTRA_KEY, mCurrentStudent);
                 startActivity(intent);
                 break;
             case R.id.delete_action:
@@ -183,14 +186,14 @@ public class StudentProfile extends AppCompatActivity {
         // Extract data from the StudentLocalDatabase object
         String name = mCurrentStudent.getName();
         int sex = mCurrentStudent.getSex();
-        int age = mCurrentStudent.getAge();
+        long birthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
         String classes = mCurrentStudent.getClasses();
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views
         mStudentNameView.setText(name);
-        mStudentAgeView.setText(String.valueOf(age));
+        mStudentAgeView.setText(DateUtils.convertDateLongToString(birthdate));
         mStudentGradeView.setText(String.valueOf(grade));
         if (TextUtils.isEmpty(classes)) {
             classes = getString(R.string.no_classes_added);

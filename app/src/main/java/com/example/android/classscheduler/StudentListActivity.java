@@ -7,9 +7,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.Model.Student;
+import com.example.android.classscheduler.data.StudentContract;
+import com.firebase.ui.database.FirebaseListOptions;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,22 +29,14 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class StudentListActivity extends AppCompatActivity
-        implements StudentAdapter.StudentAdapterOnClickHandler {
+public class StudentListActivity extends AppCompatActivity {
 
     // Constants
-    public static final String STUDENT_EXTRA_KEY = "student-extra";
     public static final String STUDENT_ID_EXTRA_KEY = "student-id-extra";
 
-    // Firebase Instances
-    private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mDatabaseReference;
-    private ChildEventListener mChildEventListener;
-
-    // Variables and views
-    private StudentAdapter mAdapter;
+    // Member variables
+    private FirebaseRecyclerAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private List<Student> mStudentList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +46,9 @@ public class StudentListActivity extends AppCompatActivity
         // Set up Timber
         Timber.plant(new Timber.DebugTree());
 
-        // Initialize Firebase references
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("students");
+        // Declare and initialize Firebase references
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference studentDatabaseReference = firebaseDatabase.getReference().child("students");
 
         // Change the title to "Students"
         setTitle(getString(R.string.students));
@@ -59,18 +59,63 @@ public class StudentListActivity extends AppCompatActivity
         // Set a layoutmanager to the recyclerview
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize List of students
-        mStudentList = new ArrayList<>();
+        // Use FirebaseRecyclerAdapter to populate the RecyclerView
+        FirebaseRecyclerOptions<Student> options = new FirebaseRecyclerOptions.Builder<Student>()
+                .setQuery(studentDatabaseReference, Student.class)
+                .build();
+        mAdapter = new FirebaseRecyclerAdapter<Student, ViewHolder>(options) {
+            @NonNull
+            @Override
+            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.student_list_item, parent, false);
 
-        // Create an empty adapter that will be used to display the student info
-        mAdapter = new StudentAdapter(this);
+                return new ViewHolder(view);
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull ViewHolder holder, int position,
+                                            @NonNull final Student currentStudent) {
+                // Extract all of the information for the current student
+                String studentName = currentStudent.getName();
+                int studentSex = currentStudent.getSex();
+                long studentBirthdate = currentStudent.getBirthdate();
+                String studentPictureUrl = currentStudent.getPhotoUrl();
+
+                String studentSexString;
+                if (studentSex == StudentContract.StudentEntry.SEX_MALE) {
+                    studentSexString = holder.itemView.getContext().getResources().getString(R.string.male);
+                } else {
+                    studentSexString = holder.itemView.getContext().getResources().getString(R.string.female);
+                }
+
+                // Populate the textviews with the data
+                holder.studentNameTV.setText(studentName);
+                holder.studentSexTV.setText(studentSexString);
+                holder.studentAgeTV.setText(DateUtils.getAge(studentBirthdate));
+
+                // Put a student picture if it exist
+                if (!TextUtils.isEmpty(studentPictureUrl)) {
+                    Glide.with(holder.studentPictureIV.getContext())
+                            .load(studentPictureUrl)
+                            .into(holder.studentPictureIV);
+                } else {
+                    holder.studentPictureIV.setImageResource(R.drawable.ic_baseline_account_circle_24px);
+                }
+
+                // Set onclicklistener
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Open the student profile for the student that was clicked on
+                        openStudentProfile(currentStudent);
+                    }
+                });
+            }
+        };
+
+        // Set adapter to recycler view
         mRecyclerView.setAdapter(mAdapter);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        attachDatabaseReadListener();
     }
 
     // When the FAB is clicked, take the user to the Edit StudentLocalDatabase Info page
@@ -79,58 +124,76 @@ public class StudentListActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    @Override
-    public void onClick(Student student) {
+    // Helper method for opening student profile for student clicked on
+    private void openStudentProfile(Student student) {
         // Use intent to open the StudentLocalDatabase Profile activity
         Intent intent = new Intent(this, StudentProfile.class);
-        //intent.putExtra(STUDENT_EXTRA_KEY, student);
         intent.putExtra(STUDENT_ID_EXTRA_KEY, student.getStudentId());
         startActivity(intent);
     }
 
-    private void attachDatabaseReadListener() {
-        if (mChildEventListener == null) {
-            mChildEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Student student = dataSnapshot.getValue(Student.class);
-                    // TODO Change this to FirebaseRecyclerView
-                    mStudentList.add(student);
-                    mAdapter.setStudentData(mStudentList);
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                }
-            };
-            mDatabaseReference.addChildEventListener(mChildEventListener);
-        }
-    }
-
-    private void detachDatabaseReadListener() {
-        if (mChildEventListener != null) {
-            mDatabaseReference.removeEventListener(mChildEventListener);
-            mChildEventListener = null;
-        }
-    }
-
+    // Listens for database changes and populates the adapter
     @Override
-    protected void onPause() {
-        super.onPause();
-        detachDatabaseReadListener();
-        mStudentList.clear();
-        mAdapter.setStudentData(null);
+    protected void onStart() {
+        super.onStart();
+        mAdapter.startListening();
+    }
+
+    // Stops listening for database changes and clears the adapter
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAdapter.stopListening();
     }
 }
+
+//    private void attachDatabaseReadListener() {
+//        if (mChildEventListener == null) {
+//            mChildEventListener = new ChildEventListener() {
+//                @Override
+//                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                    Student student = dataSnapshot.getValue(Student.class);
+//                    mStudentList.add(student);
+//                    mAdapter.setStudentData(mStudentList);
+//                }
+//
+//                @Override
+//                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//                }
+//
+//                @Override
+//                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+//                }
+//
+//                @Override
+//                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError databaseError) {
+//                }
+//            };
+//            mDatabaseReference.addChildEventListener(mChildEventListener);
+//        }
+//    }
+//
+//    private void detachDatabaseReadListener() {
+//        if (mChildEventListener != null) {
+//            mDatabaseReference.removeEventListener(mChildEventListener);
+//            mChildEventListener = null;
+//        }
+//    }
+//
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        detachDatabaseReadListener();
+//        mStudentList.clear();
+//        mAdapter.setStudentData(null);
+//    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        attachDatabaseReadListener();
+//    }

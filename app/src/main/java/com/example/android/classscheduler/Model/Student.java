@@ -11,7 +11,7 @@ public class Student implements Parcelable{
 
     private String mName;
     private int mSex;
-    private int mAge;
+    private long mBirthdate;
     private int mGrade;
     private String mClasses;
     private String mPhotoUrl;
@@ -20,11 +20,11 @@ public class Student implements Parcelable{
     public Student() {
     }
 
-    public Student(String name, int sex, int age, int grade, String classes, String photoUrl,
+    public Student(String name, int sex, long birthdate, int grade, String classes, String photoUrl,
                    String studentId) {
         this.mName = name;
         this.mSex = sex;
-        this.mAge = age;
+        this.mBirthdate = birthdate;
         this.mGrade = grade;
         this.mClasses = classes;
         this.mPhotoUrl = photoUrl;
@@ -43,9 +43,9 @@ public class Student implements Parcelable{
 
     public void setSex(int sex) { this.mSex = sex; }
 
-    public int getAge() { return mAge; }
+    public long getBirthdate() { return mBirthdate; }
 
-    public void setAge(int age) { this.mAge = age; }
+    public void setBirthdate(long birthdate) { this.mBirthdate = birthdate; }
 
     public int getGrade() { return mGrade; }
 
@@ -88,7 +88,7 @@ public class Student implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mName);
         dest.writeInt(mSex);
-        dest.writeInt(mAge);
+        dest.writeLong(mBirthdate);
         dest.writeInt(mGrade);
         dest.writeString(mClasses);
         dest.writeString(mPhotoUrl);
@@ -98,7 +98,7 @@ public class Student implements Parcelable{
     protected Student(Parcel in) {
         mName = in.readString();
         mSex = in.readInt();
-        mAge = in.readInt();
+        mBirthdate = in.readLong();
         mGrade = in.readInt();
         mClasses = in.readString();
         mPhotoUrl = in.readString();

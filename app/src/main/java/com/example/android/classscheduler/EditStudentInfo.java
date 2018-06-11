@@ -28,9 +28,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,10 +47,17 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.text.DateFormatSymbols;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 import butterknife.BindView;
@@ -59,6 +68,9 @@ public class EditStudentInfo extends AppCompatActivity {
 
     // Integer variable to keep track of the student's sex. Put male as the default.
     private int mStudentSex = StudentEntry.SEX_MALE;
+
+    // Integer variable to keep track of student's birthdate
+    private long mStudentBirthdate;
 
     // Variable for current student (if editing a student's information)
     private Student mCurrentStudent;
@@ -95,8 +107,8 @@ public class EditStudentInfo extends AppCompatActivity {
     EditText mStudentNameEditText;
     @BindView(R.id.student_sex_spinner)
     Spinner mStudentSexSpinner;
-    @BindView(R.id.student_age_edit_text)
-    EditText mStudentAgeEditText;
+    @BindView(R.id.student_birthdate_text_view)
+    TextView mStudentBirthdateTextView;
     @BindView(R.id.student_grade_edit_text)
     EditText mStudentGradeEditText;
     @BindView(R.id.student_classes_edit_text)
@@ -109,6 +121,8 @@ public class EditStudentInfo extends AppCompatActivity {
     ImageView mAddPhotoImageView;
     @BindView(R.id.saving_student_progress_bar)
     ProgressBar mSavingProgressBar;
+    @BindView(R.id.student_birthdate_relative_layout)
+    RelativeLayout mStudentBirthdateRelativeLayout;
 
     // OnTouchListener to listen for user touches on Edit Text views. A touch indicates that
     // a change has probably been made to the info.
@@ -149,7 +163,7 @@ public class EditStudentInfo extends AppCompatActivity {
         mStudentPhotosStorageReference = mFirebaseStorage.getReference().child("student_photos");
 
         // Get intent to see whether we are updating an old student or adding a new student
-        mCurrentStudent = getIntent().getParcelableExtra(StudentListActivity.STUDENT_EXTRA_KEY);
+        mCurrentStudent = getIntent().getParcelableExtra(StudentProfile.STUDENT_EXTRA_KEY);
 
         if (mCurrentStudent != null) {
             setTitle("Edit Profile");
@@ -172,19 +186,53 @@ public class EditStudentInfo extends AppCompatActivity {
         checkIfThereIsStudentPhoto();
     }
 
+    public void openDatePicker(View v) {
+        final Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(this,
+                new android.app.DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int month, int day) {
+                        // Format the date like this: Jan 01, 2018
+                        DateFormatSymbols dateFormatSymbols = new DateFormatSymbols();
+                        String dateString = dateFormatSymbols.getMonths()[month] + " " + day + ", " + year;
+                        mStudentBirthdateTextView.setText(dateString);
+
+                        // Save the date as a long
+                        try {
+                            String dateStringForStorage = String.valueOf(day) + "/"
+                                    + String.valueOf(month + 1) + "/"
+                                    + String.valueOf(year);
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                            Date date = sdf.parse(dateStringForStorage);
+
+                            mStudentBirthdate = date.getTime();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, year, month, day);
+        datePickerDialog.show();
+    }
+
     // Method for filling in a current student's information into the input fields
     private void fillInCurrentStudentInfo() {
         // Extract info from Student object
         String name = mCurrentStudent.getName();
         int sex = mCurrentStudent.getSex();
-        int age = mCurrentStudent.getAge();
+        long birthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
         String classes = mCurrentStudent.getClasses();
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views with the current student's information
         mStudentNameEditText.setText(name);
-        mStudentAgeEditText.setText(String.valueOf(age));
+        //mStudentAgeEditText.setText(String.valueOf(age));
+        mStudentBirthdateTextView.setText(DateUtils.convertDateLongToString(birthdate));
         mStudentGradeEditText.setText(String.valueOf(grade));
         mStudentClassesEditText.setText(classes);
 
@@ -322,7 +370,7 @@ public class EditStudentInfo extends AppCompatActivity {
     private void setTouchListeners() {
         mStudentNameEditText.addTextChangedListener(mTextListener);
         mStudentSexSpinner.setOnTouchListener(mTouchListener);
-        mStudentAgeEditText.addTextChangedListener(mTextListener);
+        mStudentBirthdateRelativeLayout.setOnTouchListener(mTouchListener);
         mStudentGradeEditText.addTextChangedListener(mTextListener);
         mStudentClassesEditText.addTextChangedListener(mTextListener);
         mAddPhotoView.setOnTouchListener(mTouchListener);
@@ -432,12 +480,13 @@ public class EditStudentInfo extends AppCompatActivity {
                         String studentPhoto = mFirebaseStoragePhotoUri.toString();
                         String studentName = mStudentNameEditText.getText().toString().trim();
                         int studentSex = mStudentSex;
-                        int studentAge = Integer.parseInt(mStudentAgeEditText.getText().toString());
+                        //int studentAge = Integer.parseInt(mStudentAgeEditText.getText().toString());
+                        long studentBirthdate = mStudentBirthdate;
                         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
                         String studentClasses = mStudentClassesEditText.getText().toString().trim();
 
-                        Student newStudent = new Student(studentName, studentSex, studentAge, studentGrade,
-                                studentClasses, studentPhoto, studentId);
+                        Student newStudent = new Student(studentName, studentSex, studentBirthdate,
+                                studentGrade, studentClasses, studentPhoto, studentId);
 
                         mDatabaseReference.child(studentId).setValue(newStudent);
 
@@ -453,7 +502,7 @@ public class EditStudentInfo extends AppCompatActivity {
         // Extract Student information from the edit text views
         String studentName = mStudentNameEditText.getText().toString().trim();
         int studentSex = mStudentSex;
-        int studentAge = Integer.parseInt(mStudentAgeEditText.getText().toString());
+        long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
         String studentClasses = mStudentClassesEditText.getText().toString().trim();
 
@@ -461,7 +510,7 @@ public class EditStudentInfo extends AppCompatActivity {
             // Save photo to Firebase Storage using AsyncTask
             saveStudentPhotoToFirebaseStorage(studentId);
         } else {
-            Student newStudent = new Student(studentName, studentSex, studentAge, studentGrade,
+            Student newStudent = new Student(studentName, studentSex, studentBirthdate, studentGrade,
                     studentClasses, null, studentId);
 
             mDatabaseReference.child(studentId).setValue(newStudent);
@@ -475,7 +524,7 @@ public class EditStudentInfo extends AppCompatActivity {
     private void updateStudentOnFirebaseDatabase() {
         String studentName = mStudentNameEditText.getText().toString().trim();
         int studentSex = mStudentSex;
-        int studentAge = Integer.parseInt(mStudentAgeEditText.getText().toString());
+        long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
         String studentClasses = mStudentClassesEditText.getText().toString().trim();
         String studentId = mCurrentStudent.getStudentId();
@@ -493,7 +542,7 @@ public class EditStudentInfo extends AppCompatActivity {
             }
 
             mFirebaseDatabase.getReference().child("students").child(studentId)
-                    .setValue(new Student(studentName, studentSex, studentAge, studentGrade,
+                    .setValue(new Student(studentName, studentSex, studentBirthdate, studentGrade,
                             studentClasses, photoUrl, studentId));
 
             // Close activity
@@ -505,7 +554,7 @@ public class EditStudentInfo extends AppCompatActivity {
     private boolean checkUserInputValidity() {
         // Extract Student information from the edit text views
         String studentName = mStudentNameEditText.getText().toString().trim();
-        String studentAgeString = mStudentAgeEditText.getText().toString();
+        //String studentAgeString = mStudentAgeEditText.getText().toString();
         String studentGradeString = mStudentGradeEditText.getText().toString();
 
         // Check for valid student name
@@ -515,19 +564,31 @@ public class EditStudentInfo extends AppCompatActivity {
             return false;
         }
 
-        // Check for valid student age
-        if (TextUtils.isEmpty(studentAgeString)) {
-            Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
-            mStudentAgeEditText.requestFocus();
+        // Check for valid student birthdate
+        if (mStudentBirthdate == 0) {
+            Toast.makeText(this, "Please enter a valid birthdate.",
+                    Toast.LENGTH_SHORT).show();
             return false;
-        } else {
-            int studentAge = Integer.parseInt(studentAgeString);
-            if (studentAge <= 0) {
-                Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
-                mStudentAgeEditText.requestFocus();
-                return false;
-            }
         }
+        if (DateUtils.isChosenDateAfterToday(mStudentBirthdate)) {
+            Toast.makeText(this, "Please enter a valid birthdate.",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        // Check for valid student age
+//        if (TextUtils.isEmpty(studentAgeString)) {
+//            Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
+//            mStudentAgeEditText.requestFocus();
+//            return false;
+//        } else {
+//            int studentAge = Integer.parseInt(studentAgeString);
+//            if (studentAge <= 0) {
+//                Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
+//                mStudentAgeEditText.requestFocus();
+//                return false;
+//            }
+//        }
 
         // Check for valid student grade
         if (TextUtils.isEmpty(studentGradeString)) {
