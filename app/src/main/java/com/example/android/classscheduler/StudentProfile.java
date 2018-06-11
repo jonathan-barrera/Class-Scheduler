@@ -77,7 +77,7 @@ public class StudentProfile extends AppCompatActivity {
 
         // Retrieve the data sent with the intent
         Intent intent = getIntent();
-        mStudentId = intent.getStringExtra(StudentListActivity.STUDENT_ID_EXTRA_KEY);
+        mStudentId = intent.getStringExtra(StudentAdapter.STUDENT_ID_EXTRA_KEY);
     }
 
     @Override

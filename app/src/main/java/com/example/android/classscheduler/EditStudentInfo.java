@@ -576,20 +576,6 @@ public class EditStudentInfo extends AppCompatActivity {
             return false;
         }
 
-        // Check for valid student age
-//        if (TextUtils.isEmpty(studentAgeString)) {
-//            Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
-//            mStudentAgeEditText.requestFocus();
-//            return false;
-//        } else {
-//            int studentAge = Integer.parseInt(studentAgeString);
-//            if (studentAge <= 0) {
-//                Toast.makeText(this, "Please enter a valid age.", Toast.LENGTH_SHORT).show();
-//                mStudentAgeEditText.requestFocus();
-//                return false;
-//            }
-//        }
-
         // Check for valid student grade
         if (TextUtils.isEmpty(studentGradeString)) {
             Toast.makeText(this, "Please enter a valid grade.", Toast.LENGTH_SHORT).show();
