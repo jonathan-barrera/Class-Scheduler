@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.android.classscheduler.CreateClassesActivity">
+
+    <TextView
+        android:id="@+id/create_new_class_label_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Create a new class:"
+        android:textSize="@dimen/label_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/subject_info_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/subject_label_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="16dp"
+                android:text="Subject"
+                android:textSize="@dimen/label_text_size" />
+
+            <EditText
+                android:id="@+id/subject_edit_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:hint="Science"
+                android:inputType="text"
+                android:textSize="@dimen/student_edit_text_size" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/teacher_info_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/teacher_label_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="16dp"
+                android:text="Teacher"
+                android:textSize="@dimen/label_text_size" />
+
+            <EditText
+                android:id="@+id/teacher_edit_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:hint="Mr. B"
+                android:inputType="text"
+                android:textSize="@dimen/student_edit_text_size" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/schedule_info_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/schedule_label_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="Schedule"
+                android:textSize="@dimen/label_text_size" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/sunday_schedule_check_box"
+                    android:text="Sunday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/monday_schedule_check_box"
+                    android:text="Monday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/tuesday_schedule_check_box"
+                    android:text="Tuesday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/wednesday_schedule_check_box"
+                    android:text="Wednesday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/thursday_schedule_check_box"
+                    android:text="Thursday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/friday_schedule_check_box"
+                    android:text="Friday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/saturday_schedule_check_box"
+                    android:text="Saturday"
+                    style="@style/dayofweek_check_box_style" />
+
+                <TextView
+                    tools:text="9:00-10:00"
+                    style="@style/dayofweek_time_text_view_style" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -24,16 +24,16 @@
         </activity>
         <activity
             android:name=".EditStudentInfo"
-            android:parentActivityName=".StudentListActivity"/>
+            android:parentActivityName=".StudentListActivity" />
 
-        <!-- Old provider for local database
+        <!--
+        Old provider for local database
 
         <provider
             android:name=".data.StudentProvider"
             android:authorities="com.example.android.classscheduler"
             android:exported="false" />
-
-            -->
+        -->
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -49,7 +49,8 @@
             android:name=".StudentProfile"
             android:label="@string/title_activity_student_profile"
             android:parentActivityName=".StudentListActivity"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
+        <activity android:name=".CreateClassesActivity"></activity>
     </application>
 
 </manifest>

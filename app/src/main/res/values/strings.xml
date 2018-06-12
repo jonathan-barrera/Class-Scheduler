@@ -9,4 +9,7 @@
     <string name="title_activity_student_profile">StudentProfile</string>
     <string name="student_profile">Student Profile</string>
     <string name="no_classes_added">No classes added</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
