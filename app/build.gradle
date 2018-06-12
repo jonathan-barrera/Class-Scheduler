@@ -49,7 +49,6 @@ dependencies {
     // Displaying images
     implementation 'com.github.bumptech.glide:glide:3.8.0'
 
-    // TODO erase this
-    // Material Date Time Picker
-    //implementation 'com.wdullaer:materialdatetimepicker:3.6.0'
+    // WordUtils
+    implementation 'org.apache.commons:commons-text:1.3'
 }

@@ -7,6 +7,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,6 +17,12 @@ import com.example.android.classscheduler.Model.Student;
 import com.example.android.classscheduler.data.StudentContract;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.database.ObservableSnapshotArray;
+
+import org.apache.commons.text.WordUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,7 +32,6 @@ import butterknife.ButterKnife;
  */
 
 public class StudentAdapter extends FirebaseRecyclerAdapter<Student, StudentAdapter.ViewHolder> {
-
 
     // Constants
     public static final String STUDENT_ID_EXTRA_KEY = "student-id-extra";
@@ -44,14 +51,13 @@ public class StudentAdapter extends FirebaseRecyclerAdapter<Student, StudentAdap
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.student_list_item, parent, false);
-
         return new ViewHolder(view);
     }
 
     @Override
     protected void onBindViewHolder(@NonNull final ViewHolder holder, int position, @NonNull final Student currentStudent) {
         // Extract all of the information for the current student
-        String studentName = currentStudent.getName();
+        String studentName = WordUtils.capitalizeFully(currentStudent.getName());
         int studentSex = currentStudent.getSex();
         long studentBirthdate = currentStudent.getBirthdate();
         String studentPictureUrl = currentStudent.getPhotoUrl();
@@ -95,24 +101,19 @@ public class StudentAdapter extends FirebaseRecyclerAdapter<Student, StudentAdap
         holder.studentNameTV.getContext().startActivity(intent);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        @BindView(R.id.student_name_text_view)
-        TextView studentNameTV;
+    public class ViewHolder extends RecyclerView.ViewHolder{
+
+        @BindView(R.id.student_name_text_view) TextView studentNameTV;
         @BindView(R.id.student_sex_text_view) TextView studentSexTV;
         @BindView(R.id.student_age_text_view) TextView studentAgeTV;
-        @BindView(R.id.student_picture_image_view)
-        ImageView studentPictureIV;
+        @BindView(R.id.student_picture_image_view) ImageView studentPictureIV;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
         }
-
-        @Override
-        public void onClick(View v) {
-
-        }
     }
+
 }

@@ -1,28 +1,25 @@
 package com.example.android.classscheduler;
 
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
-import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.Model.Student;
-import com.example.android.classscheduler.data.StudentContract;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import org.apache.commons.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +29,13 @@ import timber.log.Timber;
 public class StudentListActivity extends AppCompatActivity {
 
     // Member variables
-    //private FirebaseRecyclerAdapter mAdapter;
     private StudentAdapter mAdapter;
     private RecyclerView mRecyclerView;
+
+    // List of Student Objects
+    private List<Student> mStudentList;
+    private List<Student> mMatchedStudentList;
+    private List<String> mNameList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,10 @@ public class StudentListActivity extends AppCompatActivity {
         // Change the title to "Students"
         setTitle(getString(R.string.students));
 
+        // New list to contain student names
+        mNameList = new ArrayList<>();
+        mMatchedStudentList = new ArrayList<>();
+
         // Find a reference to the recyclerview
         mRecyclerView = findViewById(R.id.student_recycler_view);
 
@@ -62,60 +67,14 @@ public class StudentListActivity extends AppCompatActivity {
                 .setQuery(studentDatabaseReference, Student.class)
                 .build();
 
+        // Initialize adapter
         mAdapter = new StudentAdapter(options);
-//        mAdapter = new FirebaseRecyclerAdapter<Student, ViewHolder>(options) {
-//            @NonNull
-//            @Override
-//            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//                View view = LayoutInflater.from(parent.getContext())
-//                        .inflate(R.layout.student_list_item, parent, false);
-//
-//                return new ViewHolder(view);
-//            }
-//
-//            @Override
-//            protected void onBindViewHolder(@NonNull ViewHolder holder, int position,
-//                                            @NonNull final Student currentStudent) {
-//                // Extract all of the information for the current student
-//                String studentName = currentStudent.getName();
-//                int studentSex = currentStudent.getSex();
-//                long studentBirthdate = currentStudent.getBirthdate();
-//                String studentPictureUrl = currentStudent.getPhotoUrl();
-//
-//                String studentSexString;
-//                if (studentSex == StudentContract.StudentEntry.SEX_MALE) {
-//                    studentSexString = holder.itemView.getContext().getResources().getString(R.string.male);
-//                } else {
-//                    studentSexString = holder.itemView.getContext().getResources().getString(R.string.female);
-//                }
-//
-//                // Populate the textviews with the data
-//                holder.studentNameTV.setText(studentName);
-//                holder.studentSexTV.setText(studentSexString);
-//                holder.studentAgeTV.setText(DateUtils.getAge(studentBirthdate));
-//
-//                // Put a student picture if it exist
-//                if (!TextUtils.isEmpty(studentPictureUrl)) {
-//                    Glide.with(holder.studentPictureIV.getContext())
-//                            .load(studentPictureUrl)
-//                            .into(holder.studentPictureIV);
-//                } else {
-//                    holder.studentPictureIV.setImageResource(R.drawable.ic_baseline_account_circle_24px);
-//                }
-//
-//                // Set onclicklistener
-//                holder.itemView.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        // Open the student profile for the student that was clicked on
-//                        openStudentProfile(currentStudent);
-//                    }
-//                });
-//            }
-//        };
 
         // Set adapter to recycler view
         mRecyclerView.setAdapter(mAdapter);
+
+        // Get list of students and extract list of names
+        mStudentList = mAdapter.getSnapshots();
     }
 
     @Override
@@ -124,20 +83,71 @@ public class StudentListActivity extends AppCompatActivity {
 
         // Set SearchView
         MenuItem search = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) search.getActionView();
+        final SearchView searchView = (SearchView) search.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                // Clear list first
+                mNameList.clear();
+                mMatchedStudentList.clear();
+
+                // Loop through all students to get list of names
+                for (int i = 0; i < mStudentList.size(); i++) {
+                    Student student = mStudentList.get(i);
+                    String name = student.getName();
+                    if (name.contains(query.toLowerCase().trim())) {
+                        mNameList.add(WordUtils.capitalizeFully(name));
+                        mMatchedStudentList.add(student);
+                    }
+                }
+
+                // Show a list of names that could match
+                showNameMatches();
+
+                // Need to clear focus otherwise onQueryTextSubmit runs twice
+                searchView.clearFocus();
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 return false;
             }
+
+        });
+        return true;
+    }
+
+    // Helper method for show list of student names that match the search query
+    // TODO 3 add pictures to better differentiate students? maybe in the future
+    private void showNameMatches() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.name_matcher_list, null);
+        dialog.setView(view);
+        dialog.setTitle("Matches");
+
+        ListView matchesListView = view.findViewById(R.id.name_matcher_list_view);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, mNameList);
+        matchesListView.setAdapter(adapter);
+
+        matchesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Student student = mMatchedStudentList.get(position);
+                openStudentProfile(student);
+            }
         });
 
-        return true;
+        dialog.show();
+    }
+
+    // Helper method for opening student profile for student clicked on
+    private void openStudentProfile(Student student) {
+        // Use intent to open the StudentLocalDatabase Profile activity
+        Intent intent = new Intent(this, StudentProfile.class);
+        intent.putExtra(StudentAdapter.STUDENT_ID_EXTRA_KEY, student.getStudentId());
+        startActivity(intent);
     }
 
     // When the FAB is clicked, take the user to the Edit StudentLocalDatabase Info page

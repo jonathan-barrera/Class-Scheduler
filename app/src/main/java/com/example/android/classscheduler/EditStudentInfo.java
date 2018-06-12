@@ -47,13 +47,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.apache.commons.text.WordUtils;
+
 import java.text.DateFormatSymbols;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -222,17 +223,16 @@ public class EditStudentInfo extends AppCompatActivity {
     // Method for filling in a current student's information into the input fields
     private void fillInCurrentStudentInfo() {
         // Extract info from Student object
-        String name = mCurrentStudent.getName();
+        String name = WordUtils.capitalizeFully(mCurrentStudent.getName());
         int sex = mCurrentStudent.getSex();
-        long birthdate = mCurrentStudent.getBirthdate();
+        mStudentBirthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
         String classes = mCurrentStudent.getClasses();
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views with the current student's information
         mStudentNameEditText.setText(name);
-        //mStudentAgeEditText.setText(String.valueOf(age));
-        mStudentBirthdateTextView.setText(DateUtils.convertDateLongToString(birthdate));
+        mStudentBirthdateTextView.setText(DateUtils.convertDateLongToString(mStudentBirthdate));
         mStudentGradeEditText.setText(String.valueOf(grade));
         mStudentClassesEditText.setText(classes);
 
@@ -478,9 +478,8 @@ public class EditStudentInfo extends AppCompatActivity {
                         mFirebaseStoragePhotoUri = uri;
 
                         String studentPhoto = mFirebaseStoragePhotoUri.toString();
-                        String studentName = mStudentNameEditText.getText().toString().trim();
+                        String studentName = mStudentNameEditText.getText().toString().toLowerCase().trim();
                         int studentSex = mStudentSex;
-                        //int studentAge = Integer.parseInt(mStudentAgeEditText.getText().toString());
                         long studentBirthdate = mStudentBirthdate;
                         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
                         String studentClasses = mStudentClassesEditText.getText().toString().trim();
@@ -500,7 +499,7 @@ public class EditStudentInfo extends AppCompatActivity {
     // Method to save a new student to the Firebase Database
     private void saveNewStudentToFirebaseDatabase(String studentId) {
         // Extract Student information from the edit text views
-        String studentName = mStudentNameEditText.getText().toString().trim();
+        String studentName = mStudentNameEditText.getText().toString().toLowerCase().trim();
         int studentSex = mStudentSex;
         long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
@@ -522,7 +521,7 @@ public class EditStudentInfo extends AppCompatActivity {
 
     // Update existing student's information on the Firebase Database
     private void updateStudentOnFirebaseDatabase() {
-        String studentName = mStudentNameEditText.getText().toString().trim();
+        String studentName = mStudentNameEditText.getText().toString().toLowerCase().trim();
         int studentSex = mStudentSex;
         long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());

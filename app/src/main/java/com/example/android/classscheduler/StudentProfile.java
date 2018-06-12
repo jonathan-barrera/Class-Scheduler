@@ -27,6 +27,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.apache.commons.text.WordUtils;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -184,7 +186,7 @@ public class StudentProfile extends AppCompatActivity {
 
     private void populateViews() {
         // Extract data from the StudentLocalDatabase object
-        String name = mCurrentStudent.getName();
+        String name = WordUtils.capitalizeFully(mCurrentStudent.getName());
         int sex = mCurrentStudent.getSex();
         long birthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
