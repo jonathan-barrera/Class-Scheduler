@@ -9,6 +9,7 @@ import android.os.Parcelable;
 
 public class Student implements Parcelable{
 
+    // Variables to hold Student info
     private String mName;
     private int mSex;
     private long mBirthdate;
@@ -20,6 +21,7 @@ public class Student implements Parcelable{
     public Student() {
     }
 
+    // Constructor
     public Student(String name, int sex, long birthdate, int grade, String classes, String photoUrl,
                    String studentId) {
         this.mName = name;
@@ -31,6 +33,7 @@ public class Student implements Parcelable{
         this.mStudentId = studentId;
     }
 
+    // Methods for retrieving info/setting
     public String getName() {
         return mName;
     }

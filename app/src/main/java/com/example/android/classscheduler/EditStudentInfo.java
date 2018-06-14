@@ -2,12 +2,16 @@ package com.example.android.classscheduler;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -27,7 +31,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -35,11 +41,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.android.classscheduler.Model.SchoolClass;
 import com.example.android.classscheduler.Model.Student;
 import com.example.android.classscheduler.data.StudentContract.StudentEntry;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -54,8 +65,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import butterknife.BindView;
@@ -63,6 +76,19 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class EditStudentInfo extends AppCompatActivity {
+
+    // List containing all classes offered by the school
+    private ArrayList<String> mFullClassList;
+
+    // List containing classes chosen for this student
+    private List<String> mChosenClassesList;
+
+    // Keys
+    public static final String CLASS_LIST_KEY = "class-list-key";
+
+    // Fragment related variables
+    private android.support.v4.app.FragmentManager mFragmentManager;
+    private ClassPickerFragment mClassPickerFragment;
 
     // Integer variable to keep track of the student's sex. Put male as the default.
     private int mStudentSex = StudentEntry.SEX_MALE;
@@ -96,7 +122,8 @@ public class EditStudentInfo extends AppCompatActivity {
 
     // Firebase Instances
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mDatabaseReference;
+    private DatabaseReference mStudentsDatabaseReference;
+    private DatabaseReference mClassesDatabaseReference;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mStudentPhotosStorageReference;
 
@@ -109,8 +136,6 @@ public class EditStudentInfo extends AppCompatActivity {
     TextView mStudentBirthdateTextView;
     @BindView(R.id.student_grade_edit_text)
     EditText mStudentGradeEditText;
-    @BindView(R.id.student_classes_edit_text)
-    EditText mStudentClassesEditText;
     @BindView(R.id.gray_circle_background_view)
     ImageView mAddPhotoView;
     @BindView(R.id.add_photo_label_text_view)
@@ -154,9 +179,18 @@ public class EditStudentInfo extends AppCompatActivity {
         // Bind the views
         ButterKnife.bind(this);
 
+        // Initialize member variable lists
+        mFullClassList = new ArrayList<>();
+        mChosenClassesList = new ArrayList<>();
+
+        // Initialize the fragment manager
+        mFragmentManager = getSupportFragmentManager();
+        mClassPickerFragment = new ClassPickerFragment();
+
         // Initialize Firebase references
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("students");
+        mStudentsDatabaseReference = mFirebaseDatabase.getReference().child("students");
+        mClassesDatabaseReference = mFirebaseDatabase.getReference().child("classes");
         mFirebaseStorage = FirebaseStorage.getInstance();
         mStudentPhotosStorageReference = mFirebaseStorage.getReference().child("student_photos");
 
@@ -182,6 +216,41 @@ public class EditStudentInfo extends AppCompatActivity {
 
         // Check for student photo
         checkIfThereIsStudentPhoto();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Initialize Firebase instances
+        mClassesDatabaseReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
+                mFullClassList.add(schoolClass.getTitle());
+                Timber.d("This worked: " + schoolClass.getTitle());
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void openDatePicker(View v) {
@@ -231,7 +300,6 @@ public class EditStudentInfo extends AppCompatActivity {
         mStudentNameEditText.setText(name);
         mStudentBirthdateTextView.setText(DateUtils.convertDateLongToString(mStudentBirthdate));
         mStudentGradeEditText.setText(String.valueOf(grade));
-        mStudentClassesEditText.setText(classes);
 
         // Set student photo (if it exists)
         if (!TextUtils.isEmpty(photoUrl)) {
@@ -369,7 +437,6 @@ public class EditStudentInfo extends AppCompatActivity {
         mStudentSexSpinner.setOnTouchListener(mTouchListener);
         mStudentBirthdateRelativeLayout.setOnTouchListener(mTouchListener);
         mStudentGradeEditText.addTextChangedListener(mTextListener);
-        mStudentClassesEditText.addTextChangedListener(mTextListener);
         mAddPhotoView.setOnTouchListener(mTouchListener);
     }
 
@@ -479,12 +546,11 @@ public class EditStudentInfo extends AppCompatActivity {
                         int studentSex = mStudentSex;
                         long studentBirthdate = mStudentBirthdate;
                         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
-                        String studentClasses = mStudentClassesEditText.getText().toString().trim();
 
                         Student newStudent = new Student(studentName, studentSex, studentBirthdate,
-                                studentGrade, studentClasses, studentPhoto, studentId);
+                                studentGrade, "classes", studentPhoto, studentId);
 
-                        mDatabaseReference.child(studentId).setValue(newStudent);
+                        mStudentsDatabaseReference.child(studentId).setValue(newStudent);
 
                         finish();
                     }
@@ -500,16 +566,15 @@ public class EditStudentInfo extends AppCompatActivity {
         int studentSex = mStudentSex;
         long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
-        String studentClasses = mStudentClassesEditText.getText().toString().trim();
 
         if (mBitmap != null) {
             // Save photo to Firebase Storage using AsyncTask
             saveStudentPhotoToFirebaseStorage(studentId);
         } else {
             Student newStudent = new Student(studentName, studentSex, studentBirthdate, studentGrade,
-                    studentClasses, null, studentId);
+                    "classes", null, studentId);
 
-            mDatabaseReference.child(studentId).setValue(newStudent);
+            mStudentsDatabaseReference.child(studentId).setValue(newStudent);
         }
 
         // Close activity
@@ -522,7 +587,6 @@ public class EditStudentInfo extends AppCompatActivity {
         int studentSex = mStudentSex;
         long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
-        String studentClasses = mStudentClassesEditText.getText().toString().trim();
         String studentId = mCurrentStudent.getStudentId();
 
         if (mBitmap != null) {
@@ -539,7 +603,7 @@ public class EditStudentInfo extends AppCompatActivity {
 
             mFirebaseDatabase.getReference().child("students").child(studentId)
                     .setValue(new Student(studentName, studentSex, studentBirthdate, studentGrade,
-                            studentClasses, photoUrl, studentId));
+                            "classes", photoUrl, studentId));
 
             // Close activity
             finish();
@@ -550,7 +614,6 @@ public class EditStudentInfo extends AppCompatActivity {
     private boolean checkUserInputValidity() {
         // Extract Student information from the edit text views
         String studentName = mStudentNameEditText.getText().toString().trim();
-        //String studentAgeString = mStudentAgeEditText.getText().toString();
         String studentGradeString = mStudentGradeEditText.getText().toString();
 
         // Check for valid student name
@@ -632,6 +695,17 @@ public class EditStudentInfo extends AppCompatActivity {
         alertDialog.show();
     }
 
+    // Method to open Class Picker
+    public void openClassPicker(View v) {
+        // Attach data to fragment
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList(CLASS_LIST_KEY, mFullClassList);
+        mClassPickerFragment.setArguments(bundle);
+        // Show the Class Picker DialogFragment.
+        mClassPickerFragment.show(mFragmentManager, "hello");
+    }
+
+    // Method to open the Create Classes Activity
     public void openCreateClassesActivity(View v) {
         Intent intent = new Intent(this, CreateClassesActivity.class);
         startActivity(intent);
