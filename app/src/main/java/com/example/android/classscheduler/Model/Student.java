@@ -3,6 +3,9 @@ package com.example.android.classscheduler.Model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by jonathanbarrera on 6/7/18.
  */
@@ -14,7 +17,7 @@ public class Student implements Parcelable{
     private int mSex;
     private long mBirthdate;
     private int mGrade;
-    private String mClasses;
+    private List<String> mClasses;
     private String mPhotoUrl;
     private String mStudentId;
 
@@ -22,7 +25,7 @@ public class Student implements Parcelable{
     }
 
     // Constructor
-    public Student(String name, int sex, long birthdate, int grade, String classes, String photoUrl,
+    public Student(String name, int sex, long birthdate, int grade, List<String> classes, String photoUrl,
                    String studentId) {
         this.mName = name;
         this.mSex = sex;
@@ -54,9 +57,9 @@ public class Student implements Parcelable{
 
     public void setGrade(int grade) {this.mGrade = grade; }
 
-    public String getClasses() { return mClasses; }
+    public List<String> getClasses() { return mClasses; }
 
-    public void setClasses(String classes) { this.mClasses = classes; }
+    public void setClasses(List<String> classes) { this.mClasses = classes; }
 
     public String getPhotoUrl() {
         return mPhotoUrl;
@@ -93,7 +96,7 @@ public class Student implements Parcelable{
         dest.writeInt(mSex);
         dest.writeLong(mBirthdate);
         dest.writeInt(mGrade);
-        dest.writeString(mClasses);
+        dest.writeStringList(mClasses);
         dest.writeString(mPhotoUrl);
         dest.writeString(mStudentId);
     }
@@ -103,7 +106,8 @@ public class Student implements Parcelable{
         mSex = in.readInt();
         mBirthdate = in.readLong();
         mGrade = in.readInt();
-        mClasses = in.readString();
+        mClasses = new ArrayList<>();
+        in.readStringList(mClasses);
         mPhotoUrl = in.readString();
         mStudentId = in.readString();
     }

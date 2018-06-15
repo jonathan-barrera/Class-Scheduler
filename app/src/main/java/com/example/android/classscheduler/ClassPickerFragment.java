@@ -1,12 +1,16 @@
 package com.example.android.classscheduler;
 
+import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -17,6 +21,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by jonathanbarrera on 6/13/18.
@@ -24,8 +29,9 @@ import butterknife.ButterKnife;
 
 public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
 
-    //TODO bug 1: when you navigate to create new class and then come back, the list gets doubled
-    //TODO fix 2: put the ListView in a scrollable view, but allow the button at the bottom to remain in view
+    // Keys
+    public static final String PICKER_KEY = "picker";
+    public static final String REMOVER_KEY = "remover";
 
     // Views
     @BindView(R.id.class_picker_search_view)
@@ -39,29 +45,68 @@ public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
 
     // Member variables
     private ArrayAdapter<String> mAdapter;
-    private List<String> mClassList;
+    onItemClickListener mCallback;
+
+    public interface onItemClickListener {
+        void onTitleSelected(String string, String key);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallback = (onItemClickListener) context;
+    }
+
+    // Empty Constructor
+    public ClassPickerFragment() {}
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Timber.d("Fragment oncreateview called");
         // Inflate view
         View rootView = inflater.inflate(R.layout.fragment_class_picker, container, false);
 
         // Bind views
         ButterKnife.bind(this, rootView);
 
-        // Set title
-        getDialog().setTitle("Choose A Class");
+        // Declare List variables
+        List<String> fullClassList;
+        List<String> chosenClassList;
+        final String pickerOrRemoverKey;
 
-        // Get the ClassList data
-        mClassList = getArguments().getStringArrayList(EditStudentInfo.CLASS_LIST_KEY);
+        // Initialize list (depending on whether we are adding classes or removing classes)
+        if (getArguments().containsKey(EditStudentInfo.FULL_CLASS_LIST_KEY)) {
+            fullClassList = getArguments().getStringArrayList(EditStudentInfo.FULL_CLASS_LIST_KEY);
+            mAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, fullClassList);
+            pickerOrRemoverKey = PICKER_KEY;
+        }
+        else {
+            // Chosen Class List
+            chosenClassList = getArguments().getStringArrayList(EditStudentInfo.CHOSEN_CLASS_LIST_KEY);
+            mAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, chosenClassList);
+            pickerOrRemoverKey = REMOVER_KEY;
+        }
 
-        // Create and set adapter to list view
-        mAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, mClassList);
+        // Create and set the adapter
         mClassPickerListView.setAdapter(mAdapter);
 
         // Set query hint in search view
-        mClassPickerSearchView.setQueryHint("Class Title");
+        mClassPickerSearchView.setQueryHint("Search Class");
+
+        mClassPickerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (pickerOrRemoverKey.equals(PICKER_KEY)) {
+                    String selectedClassTitle = mClassPickerListView.getItemAtPosition(position).toString();
+                    mCallback.onTitleSelected(selectedClassTitle, pickerOrRemoverKey);
+                } else if (pickerOrRemoverKey.equals(REMOVER_KEY)) {
+                    String removedClassTitle = mClassPickerListView.getItemAtPosition(position).toString();
+                    mCallback.onTitleSelected(removedClassTitle, pickerOrRemoverKey);
+                }
+                dismiss();
+            }
+        });
 
         // Set the OnQueryTextListener
         mClassPickerSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -78,7 +123,6 @@ public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
         });
 
 
-
         // Set OnClickLiners for the two Buttons
         mClassPickerDismissButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +134,7 @@ public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
         mCreateClassButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dismiss();
                 Intent intent = new Intent(getActivity(), CreateClassesActivity.class);
                 startActivity(intent);
             }

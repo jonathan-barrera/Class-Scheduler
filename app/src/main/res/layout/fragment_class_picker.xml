@@ -1,45 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="8dp"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
 
     <SearchView
         android:id="@+id/class_picker_search_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        />
 
-    <ScrollView
+    <ListView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ListView
-            android:id="@+id/class_picker_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </ScrollView>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/class_picker_list_view"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/class_picker_dismiss_button"
             style="?android:attr/borderlessButtonStyle"
+            android:text="Dismiss"
+            android:id="@+id/class_picker_dismiss_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Dismiss" />
+            android:layout_weight="1"/>
 
         <Button
-            android:id="@+id/class_picker_create_class_button"
             style="?android:attr/borderlessButtonStyle"
+            android:text="New Class"
+            android:id="@+id/class_picker_create_class_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="New Class" />
+            android:layout_weight="1"/>
 
     </LinearLayout>
 

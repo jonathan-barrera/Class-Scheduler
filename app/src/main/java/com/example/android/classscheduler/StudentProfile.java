@@ -190,7 +190,7 @@ public class StudentProfile extends AppCompatActivity {
         int sex = mCurrentStudent.getSex();
         long birthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
-        String classes = mCurrentStudent.getClasses();
+        String classes = TextUtils.join(", ", mCurrentStudent.getClasses());
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views

@@ -3,6 +3,7 @@ package com.example.android.classscheduler;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -56,6 +58,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import org.apache.commons.text.WordUtils;
+import org.w3c.dom.Text;
 
 import java.text.DateFormatSymbols;
 
@@ -68,23 +71,30 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class EditStudentInfo extends AppCompatActivity {
+public class EditStudentInfo extends AppCompatActivity
+        implements ClassPickerFragment.onItemClickListener {
+
+    //TODO 1: add remove class function
+    //TODO 2: add a class details view page
 
     // List containing all classes offered by the school
     private ArrayList<String> mFullClassList;
 
     // List containing classes chosen for this student
-    private List<String> mChosenClassesList;
+    private ArrayList<String> mChosenClassesList;
 
     // Keys
-    public static final String CLASS_LIST_KEY = "class-list-key";
+    public static final String FULL_CLASS_LIST_KEY = "full-class-list-key";
+    public static final String CHOSEN_CLASS_LIST_KEY = "chosen-class-list-key";
 
     // Fragment related variables
     private android.support.v4.app.FragmentManager mFragmentManager;
@@ -146,6 +156,8 @@ public class EditStudentInfo extends AppCompatActivity {
     ProgressBar mSavingProgressBar;
     @BindView(R.id.student_birthdate_relative_layout)
     RelativeLayout mStudentBirthdateRelativeLayout;
+    @BindView(R.id.student_classes_text_view)
+    TextView mStudentClassesTextView;
 
     // OnTouchListener to listen for user touches on Edit Text views. A touch indicates that
     // a change has probably been made to the info.
@@ -173,6 +185,7 @@ public class EditStudentInfo extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Timber.d("oncreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_student_info);
 
@@ -220,6 +233,8 @@ public class EditStudentInfo extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Timber.d("onresume called");
+        mFullClassList.clear();
         super.onResume();
 
         // Initialize Firebase instances
@@ -228,7 +243,6 @@ public class EditStudentInfo extends AppCompatActivity {
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
                 mFullClassList.add(schoolClass.getTitle());
-                Timber.d("This worked: " + schoolClass.getTitle());
             }
 
             @Override
@@ -293,13 +307,16 @@ public class EditStudentInfo extends AppCompatActivity {
         int sex = mCurrentStudent.getSex();
         mStudentBirthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
-        String classes = mCurrentStudent.getClasses();
+        mChosenClassesList = (ArrayList<String>) mCurrentStudent.getClasses();
+        String classes = TextUtils.join(", ", mChosenClassesList);
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views with the current student's information
         mStudentNameEditText.setText(name);
         mStudentBirthdateTextView.setText(DateUtils.convertDateLongToString(mStudentBirthdate));
         mStudentGradeEditText.setText(String.valueOf(grade));
+        mStudentClassesTextView.setText(classes);
+        mStudentClassesTextView.setVisibility(View.VISIBLE);
 
         // Set student photo (if it exists)
         if (!TextUtils.isEmpty(photoUrl)) {
@@ -548,7 +565,7 @@ public class EditStudentInfo extends AppCompatActivity {
                         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
 
                         Student newStudent = new Student(studentName, studentSex, studentBirthdate,
-                                studentGrade, "classes", studentPhoto, studentId);
+                                studentGrade, mChosenClassesList, studentPhoto, studentId);
 
                         mStudentsDatabaseReference.child(studentId).setValue(newStudent);
 
@@ -572,7 +589,7 @@ public class EditStudentInfo extends AppCompatActivity {
             saveStudentPhotoToFirebaseStorage(studentId);
         } else {
             Student newStudent = new Student(studentName, studentSex, studentBirthdate, studentGrade,
-                    "classes", null, studentId);
+                    mChosenClassesList, null, studentId);
 
             mStudentsDatabaseReference.child(studentId).setValue(newStudent);
         }
@@ -603,7 +620,7 @@ public class EditStudentInfo extends AppCompatActivity {
 
             mFirebaseDatabase.getReference().child("students").child(studentId)
                     .setValue(new Student(studentName, studentSex, studentBirthdate, studentGrade,
-                            "classes", photoUrl, studentId));
+                            mChosenClassesList, photoUrl, studentId));
 
             // Close activity
             finish();
@@ -699,15 +716,54 @@ public class EditStudentInfo extends AppCompatActivity {
     public void openClassPicker(View v) {
         // Attach data to fragment
         Bundle bundle = new Bundle();
-        bundle.putStringArrayList(CLASS_LIST_KEY, mFullClassList);
+        bundle.putStringArrayList(FULL_CLASS_LIST_KEY, mFullClassList);
         mClassPickerFragment.setArguments(bundle);
         // Show the Class Picker DialogFragment.
-        mClassPickerFragment.show(mFragmentManager, "hello");
+        mClassPickerFragment.show(mFragmentManager, "Add Classes");
     }
 
     // Method to open the Create Classes Activity
     public void openCreateClassesActivity(View v) {
         Intent intent = new Intent(this, CreateClassesActivity.class);
         startActivity(intent);
+    }
+
+    // Put the selected class title into the list of classes
+    @Override
+    public void onTitleSelected(String classTitle, String key) {
+        if (key.equals(ClassPickerFragment.PICKER_KEY)) {
+            addTitleToChosenClassList(classTitle);
+        } else if (key.equals(ClassPickerFragment.REMOVER_KEY)) {
+            removeTitleFromChosenClassList(classTitle);
+        }
+    }
+
+    // Helper method to remove class title from Chosen Class List
+    private void removeTitleFromChosenClassList(String classTitle) {
+        for (Iterator<String> iterator = mChosenClassesList.iterator(); iterator.hasNext(); ) {
+            String a = iterator.next();
+            if (a.equals(classTitle)) {
+                iterator.remove();
+            }
+        }
+        mStudentClassesTextView.setText(TextUtils.join(", ", mChosenClassesList));
+    }
+
+    // Helper method to add class title to Chosen Class List
+    private void addTitleToChosenClassList(String classTitle) {
+        mChosenClassesList.add(classTitle);
+        String classList = TextUtils.join(", ", mChosenClassesList);
+        mStudentClassesTextView.setVisibility(View.VISIBLE);
+        mStudentClassesTextView.setText(classList);
+    }
+
+    // Method for opening Class Remover
+    public void openClassRemover(View v) {
+        // Attach data to fragment
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList(CHOSEN_CLASS_LIST_KEY, mChosenClassesList);
+        mClassPickerFragment.setArguments(bundle);
+        // Show the Class Picker DialogFragment
+        mClassPickerFragment.show(mFragmentManager, "Remove Classes");
     }
 }
