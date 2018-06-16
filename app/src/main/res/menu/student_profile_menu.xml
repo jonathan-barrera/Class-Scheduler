@@ -4,7 +4,7 @@
 
     <item
         android:title="Edit"
-        app:showAsAction="never"
+        app:showAsAction="ifRoom"
         android:id="@+id/edit_action"
         />
 

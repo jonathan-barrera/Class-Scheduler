@@ -28,7 +28,7 @@
             android:id="@+id/add_sign_image_view"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_add_24px"
+            app:srcCompat="@drawable/ic_baseline_add_24px"
             app:layout_constraintBottom_toTopOf="@+id/gray_circle_background_view"
             app:layout_constraintEnd_toStartOf="@+id/gray_circle_background_view"
             app:layout_constraintStart_toEndOf="@+id/gray_circle_background_view"
@@ -72,7 +72,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Name"
+                android:paddingLeft="16dp"
+                android:text="@string/name"
                 android:textSize="@dimen/label_text_size" />
 
             <EditText
@@ -81,7 +82,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:hint="Jon B."
                 android:inputType="textPersonName"
                 android:textSize="@dimen/student_edit_text_size" />
 
@@ -107,7 +107,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Sex"
+                android:paddingLeft="16dp"
+                android:text="@string/sex"
                 android:textSize="@dimen/label_text_size" />
 
             <Spinner
@@ -138,7 +139,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Birthdate"
+                android:paddingLeft="16dp"
+                android:text="@string/birthdate"
                 android:textSize="@dimen/label_text_size" />
 
             <RelativeLayout
@@ -154,6 +156,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:paddingLeft="4dp"
+                    android:paddingStart="4dp"
                     android:textSize="@dimen/label_text_size"
                     tools:text="August 13, 1991" />
 
@@ -161,8 +164,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:paddingEnd="12dp"
+                    android:paddingRight="12dp"
                     android:scaleType="fitEnd"
                     app:srcCompat="@drawable/ic_baseline_calendar_today_24px" />
 
@@ -189,7 +194,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Grade"
+                android:paddingLeft="16dp"
+                android:text="@string/grade"
                 android:textSize="@dimen/label_text_size" />
 
             <EditText
@@ -198,7 +204,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:hint="1"
                 android:inputType="number"
                 android:textSize="@dimen/student_edit_text_size" />
         </LinearLayout>
@@ -223,7 +228,8 @@
                 android:layout_weight="1"
                 android:onClick="openCreateClassesActivity"
                 android:paddingStart="16dp"
-                android:text="Classes"
+                android:paddingLeft="16dp"
+                android:text="@string/classes"
                 android:textSize="@dimen/label_text_size" />
 
             <LinearLayout
@@ -255,7 +261,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_alignParentLeft="true"
                         android:onClick="openClassPicker"
-                        android:text="Add Class"
+                        android:text="@string/add_class"
                         android:textColor="@color/colorPrimary"
                         android:textSize="@dimen/student_edit_text_size" />
 
@@ -269,7 +275,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:onClick="openClassRemover"
-                        android:text="Remove Class"
+                        android:text="@string/remove_class"
                         android:textColor="@color/colorPrimary"
                         android:textSize="@dimen/student_edit_text_size" />
 

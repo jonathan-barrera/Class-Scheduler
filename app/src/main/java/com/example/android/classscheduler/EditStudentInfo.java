@@ -83,8 +83,8 @@ import timber.log.Timber;
 public class EditStudentInfo extends AppCompatActivity
         implements ClassPickerFragment.onItemClickListener {
 
-    //TODO 1: add remove class function
-    //TODO 2: add a class details view page
+    //TODO 1: add a class details view page
+    //TODO 2: stop user from adding the same class twice
 
     // List containing all classes offered by the school
     private ArrayList<String> mFullClassList;

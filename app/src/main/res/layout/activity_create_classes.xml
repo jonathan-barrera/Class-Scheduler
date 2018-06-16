@@ -27,7 +27,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Title"
+                android:paddingLeft="16dp"
+                android:text="@string/title"
                 android:textSize="@dimen/label_text_size" />
 
             <EditText
@@ -35,7 +36,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:hint="Level 4 Biology"
                 android:inputType="text"
                 android:textSize="@dimen/student_edit_text_size" />
 
@@ -55,7 +55,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Subject"
+                android:paddingLeft="16dp"
+                android:text="@string/subject"
                 android:textSize="@dimen/label_text_size" />
 
             <EditText
@@ -63,7 +64,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:hint="Science"
                 android:inputType="text"
                 android:textSize="@dimen/student_edit_text_size" />
 
@@ -83,7 +83,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
-                android:text="Teacher"
+                android:paddingLeft="16dp"
+                android:text="@string/teacher"
                 android:textSize="@dimen/label_text_size" />
 
             <EditText
@@ -91,7 +92,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:hint="Mr. B"
                 android:inputType="text"
                 android:textSize="@dimen/student_edit_text_size" />
 
@@ -112,7 +112,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/sunday_schedule_check_box"
-                    android:text="Sunday"
+                    android:text="@string/sunday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView
@@ -128,7 +128,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/monday_schedule_check_box"
-                    android:text="Monday"
+                    android:text="@string/monday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView
@@ -144,7 +144,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/tuesday_schedule_check_box"
-                    android:text="Tuesday"
+                    android:text="@string/tuesday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView
@@ -160,7 +160,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/wednesday_schedule_check_box"
-                    android:text="Wednesday"
+                    android:text="@string/wednesday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView
@@ -176,7 +176,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/thursday_schedule_check_box"
-                    android:text="Thursday"
+                    android:text="@string/thursday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView
@@ -192,7 +192,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/friday_schedule_check_box"
-                    android:text="Friday"
+                    android:text="@string/friday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView
@@ -208,7 +208,7 @@
 
                 <android.support.v7.widget.AppCompatCheckBox
                     android:id="@+id/saturday_schedule_check_box"
-                    android:text="Saturday"
+                    android:text="@string/saturday"
                     style="@style/dayofweek_check_box_style" />
 
                 <TextView

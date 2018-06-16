@@ -23,7 +23,7 @@
 
         <Button
             style="?android:attr/borderlessButtonStyle"
-            android:text="Dismiss"
+            android:text="@string/dismiss"
             android:id="@+id/class_picker_dismiss_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
 
         <Button
             style="?android:attr/borderlessButtonStyle"
-            android:text="New Class"
+            android:text="@string/new_class"
             android:id="@+id/class_picker_create_class_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

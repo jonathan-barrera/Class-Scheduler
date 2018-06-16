@@ -9,4 +9,24 @@
     <string name="title_activity_student_profile">StudentProfile</string>
     <string name="student_profile">Student Profile</string>
     <string name="no_classes_added">No classes added</string>
+    <string name="name">Name</string>
+    <string name="sex">Sex</string>
+    <string name="birthdate">Birthdate</string>
+    <string name="grade">Grade</string>
+    <string name="classes">Classes</string>
+    <string name="add_class">Add Class</string>
+    <string name="remove_class">Remove Class</string>
+    <string name="title">Title</string>
+    <string name="subject">Subject</string>
+    <string name="teacher">Teacher</string>
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="view_class_details">View Class Details</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="new_class">New Class</string>
 </resources>

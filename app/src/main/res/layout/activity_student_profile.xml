@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -24,13 +23,13 @@
         android:id="@+id/student_profile_plus_image_view"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        app:srcCompat="@drawable/ic_baseline_add_24px"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/student_profile_picture_view"
         app:layout_constraintEnd_toStartOf="@+id/student_profile_picture_view"
         app:layout_constraintStart_toEndOf="@+id/student_profile_picture_view"
         app:layout_constraintTop_toBottomOf="@+id/student_profile_picture_view"
-        app:layout_constraintVertical_bias="0.53" />
+        app:layout_constraintVertical_bias="0.53"
+        app:srcCompat="@drawable/ic_baseline_add_24px" />
 
     <TextView
         android:id="@+id/student_profile_add_photo_text_view"
@@ -39,8 +38,8 @@
         android:layout_marginBottom="8dp"
         android:text="@string/add_photo"
         android:textColor="@android:color/black"
-        android:visibility="invisible"
         android:textSize="18sp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/student_profile_picture_view"
         app:layout_constraintEnd_toEndOf="@+id/student_profile_picture_view"
         app:layout_constraintHorizontal_bias="0.504"
@@ -63,23 +62,24 @@
         app:layout_constraintTop_toBottomOf="@+id/student_profile_picture_view">
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:id="@+id/student_name_label_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:paddingStart="16dp"
-            android:text="Name"
+            android:paddingLeft="16dp"
+            android:text="@string/name"
             android:textSize="@dimen/label_text_size" />
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:id="@+id/student_profile_name_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="2"
-            tools:text="Jon B"
-            android:textSize="@dimen/student_edit_text_size" />
+            android:textSize="@dimen/student_edit_text_size"
+            tools:text="Jon B" />
 
     </LinearLayout>
 
@@ -104,18 +104,18 @@
             android:layout_weight="1"
             android:paddingLeft="16dp"
             android:paddingStart="16dp"
-            android:text="Sex"
+            android:text="@string/sex"
             android:textSize="@dimen/label_text_size" />
 
         <TextView
             android:id="@+id/student_profile_sex_view"
 
-            android:layout_gravity="center_vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="2"
-            tools:text="Male"
-            android:textSize="@dimen/student_edit_text_size"/>
+            android:textSize="@dimen/student_edit_text_size"
+            tools:text="Male" />
     </LinearLayout>
 
     <LinearLayout
@@ -132,23 +132,24 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:id="@+id/student_age_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:paddingStart="16dp"
-            android:text="Birthdate"
+            android:paddingLeft="16dp"
+            android:text="@string/birthdate"
             android:textSize="@dimen/label_text_size" />
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:id="@+id/student_profile_age_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="2"
-            tools:text="26"
-            android:textSize="@dimen/student_edit_text_size" />
+            android:textSize="@dimen/student_edit_text_size"
+            tools:text="26" />
 
     </LinearLayout>
 
@@ -166,29 +167,29 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:id="@+id/student_grade_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:paddingStart="16dp"
-            android:text="Grade"
+            android:paddingLeft="16dp"
+            android:text="@string/grade"
             android:textSize="@dimen/label_text_size" />
 
         <TextView
-            android:layout_gravity="center_vertical"
             android:id="@+id/student_profile_grade_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="2"
-            tools:text="13"
-            android:textSize="@dimen/student_edit_text_size" />
+            android:textSize="@dimen/student_edit_text_size"
+            tools:text="13" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="@dimen/input_views_height"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -202,21 +203,40 @@
         <TextView
             android:id="@+id/student_classes_label"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:paddingStart="16dp"
-            android:text="Classes"
+            android:paddingLeft="16dp"
+            android:text="@string/classes"
             android:textSize="@dimen/label_text_size" />
 
-        <TextView
-            android:id="@+id/student_profile_classes_view"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            tools:text="Science, Math"
-            android:maxLines="3"
-            android:textSize="@dimen/student_edit_text_size" />
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/student_profile_classes_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="3"
+                android:textSize="@dimen/student_edit_text_size"
+                tools:text="Science, Math" />
+
+            <TextView
+                android:onClick="openClassDetailsActivity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="@string/view_class_details"
+                android:textColor="@color/colorPrimary"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                />
+
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

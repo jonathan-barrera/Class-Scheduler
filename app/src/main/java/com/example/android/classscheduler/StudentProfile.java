@@ -29,6 +29,10 @@ import com.google.firebase.storage.StorageReference;
 
 import org.apache.commons.text.WordUtils;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -37,10 +41,12 @@ public class StudentProfile extends AppCompatActivity {
 
     // Constants
     public static final String STUDENT_EXTRA_KEY = "student-extra-key";
+    public static final String CLASS_LIST_EXTRA_KEY = "class-list-extra-key";
 
     // Member variables
     private Student mCurrentStudent;
     private String mStudentId;
+    private ArrayList<String> mChosenClassList;
 
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
@@ -190,7 +196,8 @@ public class StudentProfile extends AppCompatActivity {
         int sex = mCurrentStudent.getSex();
         long birthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
-        String classes = TextUtils.join(", ", mCurrentStudent.getClasses());
+        mChosenClassList = (ArrayList<String>) mCurrentStudent.getClasses();
+        String classes = TextUtils.join(", ", mChosenClassList);
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views
@@ -231,4 +238,10 @@ public class StudentProfile extends AppCompatActivity {
 
     }
 
+    // Method for opening the Class Details page
+    public void openClassDetailsActivity(View v) {
+        Intent intent = new Intent(this, ClassDetailsActivity.class);
+        intent.putStringArrayListExtra(CLASS_LIST_EXTRA_KEY, mChosenClassList);
+        startActivity(intent);
+    }
 }

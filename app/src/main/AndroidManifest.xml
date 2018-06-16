@@ -50,7 +50,8 @@
             android:label="@string/title_activity_student_profile"
             android:parentActivityName=".StudentListActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".CreateClassesActivity"></activity>
+        <activity android:name=".CreateClassesActivity" />
+        <activity android:name=".ClassDetailsActivity"></activity>
     </application>
 
 </manifest>

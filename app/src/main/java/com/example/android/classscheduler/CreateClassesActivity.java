@@ -31,13 +31,13 @@ import butterknife.ButterKnife;
 public class CreateClassesActivity extends AppCompatActivity {
 
     // Constants
-    private static final int SUNDAY_INT = 1;
-    private static final int MONDAY_INT = 2;
-    private static final int TUESDAY_INT = 3;
-    private static final int WEDNESDAY_INT = 4;
-    private static final int THURSDAY_INT = 5;
-    private static final int FRIDAY_INT = 6;
-    private static final int SATURDAY_INT = 7;
+    public static final int SUNDAY_INT = 1;
+    public static final int MONDAY_INT = 2;
+    public static final int TUESDAY_INT = 3;
+    public static final int WEDNESDAY_INT = 4;
+    public static final int THURSDAY_INT = 5;
+    public static final int FRIDAY_INT = 6;
+    public static final int SATURDAY_INT = 7;
 
     // Views
     @BindView(R.id.sunday_schedule_check_box)
@@ -90,7 +90,6 @@ public class CreateClassesActivity extends AppCompatActivity {
     private String mTitle;
     private String mSubject;
     private String mTeacher;
-    private String mClassId;
     private List<String> mClassTimesList = new ArrayList<>();
 
     // Checked Change Listener
@@ -101,6 +100,9 @@ public class CreateClassesActivity extends AppCompatActivity {
                     if (isChecked) {
                         getCurrentSelectedDay(buttonView);
                         getStartTime();
+                    } else {
+                        // If a day is unchecked, remove the time that was saved for it
+                        removeTimeFromSelectedDay(buttonView);
                     }
                 }
             };
@@ -112,6 +114,9 @@ public class CreateClassesActivity extends AppCompatActivity {
 
         // Bind views
         ButterKnife.bind(this);
+
+        // Set title
+        setTitle("Create New Class");
 
         // Set onchecklisteners on checkboxes
         setOnCheckListeners();
@@ -239,8 +244,6 @@ public class CreateClassesActivity extends AppCompatActivity {
 
                     // Change the text view to reflect the time slot
                     updateTimeSlotTextView();
-
-                    Toast.makeText(CreateClassesActivity.this, chosenTimeAndDay, Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -354,8 +357,53 @@ public class CreateClassesActivity extends AppCompatActivity {
             default:
                 throw new IllegalArgumentException("Invalid View selected: " + view.getId());
         }
-        if (view == mSundayCheckBox) {
-            mCurrentSelectedDay = 1;
+    }
+
+    // Helper method for removing a time from the schedule
+    private void removeTimeFromSelectedDay(View view) {
+        // Get the currently selected day
+        getCurrentSelectedDay(view);
+
+        // Loop through the class times list and remove any time that beings with the integer
+        // assigned to a day of the week (ex. Sunday (1), Monday (2), etc.)
+        for (int i = 0; i < mClassTimesList.size(); i++) {
+            String classTime = mClassTimesList.get(i);
+            if (classTime.startsWith(String.valueOf(mCurrentSelectedDay))) {
+                mClassTimesList.remove(i);
+            }
+        }
+
+        // Clear the associated text view
+        clearTimeSlotTextView();
+    }
+
+    // Helper method to clear the textview for the timeslot of a day that has been unchecked
+    private void clearTimeSlotTextView() {
+        switch (mCurrentSelectedDay) {
+            case SUNDAY_INT:
+                mSundayTimeTextView.setText(null);
+                break;
+            case MONDAY_INT:
+                mMondayTimeTextView.setText(null);
+                break;
+            case TUESDAY_INT:
+                mTuesdayTimeTextView.setText(null);
+                break;
+            case WEDNESDAY_INT:
+                mWednesdayTimeTextView.setText(null);
+                break;
+            case THURSDAY_INT:
+                mThursdayTimeTextView.setText(null);
+                break;
+            case FRIDAY_INT:
+                mFridayTimeTextView.setText(null);
+                break;
+            case SATURDAY_INT:
+                mSundayTimeTextView.setText(null);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid Day of the Week integer: " +
+                        mCurrentSelectedDay);
         }
     }
 }
