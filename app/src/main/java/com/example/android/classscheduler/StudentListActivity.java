@@ -2,6 +2,7 @@ package com.example.android.classscheduler;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -31,43 +32,42 @@ import timber.log.Timber;
 
 public class StudentListActivity extends AppCompatActivity {
 
-    // Constants
-    private final static String STUDENTS_FIREBASE_KEY = "students";
-
     // Member variables
-    //private StudentAdapterAlt mAdapter;
     private StudentAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private String mUserId;
 
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mClassesDatabaseReference;
+    private DatabaseReference mStudentDatabaseReference;
+    private ChildEventListener mChildEventListener;
 
     // List of Student Objects
     private List<Student> mStudentList;
     private List<Student> mMatchedStudentList;
-    private List<String> mNameList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_list);
 
-        // Declare and initialize Firebase references
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference studentDatabaseReference = firebaseDatabase.getReference().child(STUDENTS_FIREBASE_KEY);
-
         // Change the title to "Students"
         setTitle(getString(R.string.students));
 
+        // Get the UserId
+        SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
+        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
+
         // New list to contain student names
-        mNameList = new ArrayList<>();
         mMatchedStudentList = new ArrayList<>();
         mStudentList = new ArrayList<>();
 
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mClassesDatabaseReference = mFirebaseDatabase.getReference().child("students");
+        mStudentDatabaseReference = mFirebaseDatabase.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("students");
 
         // Find a reference to the recyclerview
         mRecyclerView = findViewById(R.id.student_recycler_view);
@@ -75,61 +75,55 @@ public class StudentListActivity extends AppCompatActivity {
         // Set a layoutmanager to the recyclerview
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Use FirebaseRecyclerAdapter to populate the RecyclerView
-        FirebaseRecyclerOptions<Student> options = new FirebaseRecyclerOptions.Builder<Student>()
-                .setQuery(studentDatabaseReference, Student.class)
-                .build();
-
-        // Initialize adapter
-        //mAdapter = new StudentAdapterAlt(options);
-
-        // Set adapter to recycler view
-        //mRecyclerView.setAdapter(mAdapter);
-
-        // Get list of students and extract list of names
-        //mStudentList = mAdapter.getSnapshots();
+        // Initialize adapter and set to Recycler View
+        mAdapter = new StudentAdapter();
+        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.setClassData(mStudentList);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        // TODO can move to oncreate?
-        // Initialize adapter and set to Recycler View
-        mAdapter = new StudentAdapter();
-        mRecyclerView.setAdapter(mAdapter);
-        mAdapter.setClassData(mStudentList);
-
         // Use this data to download relevant SchoolClass objects from Firebase Database
         // Initialize Firebase instances
-        mClassesDatabaseReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Student student = dataSnapshot.getValue(Student.class);
-                mStudentList.add(student);
-                mAdapter.notifyDataSetChanged();
-            }
+        if (mChildEventListener == null) {
+            mChildEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    Student student = dataSnapshot.getValue(Student.class);
+                    for (int i = 0; i < mStudentList.size(); i++) {
+                        if (mStudentList.get(i).getStudentId().equals(student.getStudentId())) {
+                            return;
+                        }
+                    }
+                    mStudentList.add(student);
+                    mAdapter.notifyDataSetChanged();
+                }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
+                }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
-            }
+                }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            };
+
+            mStudentDatabaseReference.addChildEventListener(mChildEventListener);
+        }
     }
 
     @Override
@@ -142,26 +136,6 @@ public class StudentListActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-//                // Clear list first
-//                mNameList.clear();
-//                mMatchedStudentList.clear();
-//
-//                // Loop through all students to get list of names
-//                for (int i = 0; i < mStudentList.size(); i++) {
-//                    Student student = mStudentList.get(i);
-//                    String name = student.getName();
-//                    if (name.contains(query.toLowerCase().trim())) {
-//                        mNameList.add(WordUtils.capitalizeFully(name));
-//                        mMatchedStudentList.add(student);
-//                    }
-//                }
-//
-//                // Show a list of names that could match
-//                showNameMatches();
-//
-//                // Need to clear focus otherwise onQueryTextSubmit runs twice
-//                searchView.clearFocus();
-//                return true;
                 return false;
             }
 
@@ -190,37 +164,6 @@ public class StudentListActivity extends AppCompatActivity {
         return true;
     }
 
-    // Helper method for show list of student names that match the search query
-    private void showNameMatches() {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        View view = getLayoutInflater().inflate(R.layout.name_matcher_list, null);
-        dialog.setView(view);
-        dialog.setTitle("Matches");
-
-        ListView matchesListView = view.findViewById(R.id.name_matcher_list_view);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, mNameList);
-        matchesListView.setAdapter(adapter);
-
-        matchesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Student student = mMatchedStudentList.get(position);
-                openStudentProfile(student);
-            }
-        });
-
-        dialog.show();
-    }
-
-    // Helper method for opening student profile for student clicked on
-    private void openStudentProfile(Student student) {
-        // Use intent to open the Student Profile activity
-        Intent intent = new Intent(this, StudentProfile.class);
-        intent.putExtra(StudentAdapterAlt.STUDENT_ID_EXTRA_KEY, student.getStudentId());
-        startActivity(intent);
-    }
-
     // When the FAB is clicked, take the user to the Edit StudentLocalDatabase Info page
     public void openEditStudentInfo(View view) {
         Intent intent = new Intent(this, EditStudentInfo.class);
@@ -228,9 +171,16 @@ public class StudentListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
+
+        // Clear Student Object list
         mStudentList.clear();
-        mAdapter.setClassData(null);
+
+        // Detach ChildEventListener
+        if (mChildEventListener != null) {
+            mStudentDatabaseReference.removeEventListener(mChildEventListener);
+            mChildEventListener = null;
+        }
     }
 }

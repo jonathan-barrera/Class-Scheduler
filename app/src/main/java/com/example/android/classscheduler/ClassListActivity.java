@@ -1,6 +1,7 @@
 package com.example.android.classscheduler;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +48,9 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     List<SchoolClass> mClassObjectList;
     List<SchoolClass> mMatchedClassObjectList;
 
-    SchoolClassAdapter mAdapter;
+    // Member variables
+    private SchoolClassAdapter mAdapter;
+    private String mUserId;
 
     // Views
     @BindView(R.id.class_list_recycler_view)
@@ -56,6 +59,7 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mClassesDatabaseReference;
+    private ChildEventListener mChildEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +69,16 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
         // Bind views
         ButterKnife.bind(this);
 
+        // Get UserId
+        SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
+        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
+
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mClassesDatabaseReference = mFirebaseDatabase.getReference().child("classes");
+        mClassesDatabaseReference = mFirebaseDatabase.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("classes");
 
         // Get data from intent
         mClassObjectList = new ArrayList<>();
@@ -78,47 +89,49 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
 
         // Set Layout Manager
         mClassListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
 
         // Initialize adapter and set to Recycler View
         mAdapter = new SchoolClassAdapter();
         mClassListRecyclerView.setAdapter(mAdapter);
         mAdapter.setClassData(mClassObjectList);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         // Use this data to download relevant SchoolClass objects from Firebase Database
         // Initialize Firebase instances
-        mClassesDatabaseReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
-                mClassObjectList.add(schoolClass);
-                mAdapter.notifyDataSetChanged();
-            }
+        if (mChildEventListener == null) {
+            mChildEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
+                    mClassObjectList.add(schoolClass);
+                    mAdapter.notifyDataSetChanged();
+                }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
+                }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
-            }
+                }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            };
+            mClassesDatabaseReference.addChildEventListener(mChildEventListener);
+        }
     }
 
     @Override
@@ -131,25 +144,6 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-//                // Clear list first
-//                mMatchedClassObjectList.clear();
-//
-//                // Show a list of names that could match
-//                mAdapter.setClassData(mMatchedClassObjectList);
-//
-//                // Loop through all students to get list of matched classes
-//                for (int i = 0; i < mClassObjectList.size(); i++) {
-//                    SchoolClass schoolClass = mClassObjectList.get(i);
-//                    String title = schoolClass.getTitle();
-//                    if ((title.toLowerCase()).contains(query.toLowerCase().trim())) {
-//                        mMatchedClassObjectList.add(schoolClass);
-//                        mAdapter.notifyDataSetChanged();
-//                    }
-//                }
-//
-//                // Need to clear focus otherwise onQueryTextSubmit runs twice
-//                searchView.clearFocus();
-//                return true;
                 return false;
             }
 
@@ -165,11 +159,9 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
                 for (int i = 0; i < mClassObjectList.size(); i++) {
                     SchoolClass schoolClass = mClassObjectList.get(i);
                     String title = schoolClass.getTitle();
-                    Timber.d(title + "flag");
                     if ((title.toLowerCase()).contains(newText.toLowerCase().trim())) {
                         mMatchedClassObjectList.add(schoolClass);
                         mAdapter.notifyDataSetChanged();
-                        Timber.d("mmatchedclassobjectlist size is " + mMatchedClassObjectList.size());
                     }
                 }
                 return true;
@@ -193,10 +185,18 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
         startActivity(intent);
     }
 
+
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
+
+        // Clear Class Object List
         mClassObjectList.clear();
-        mAdapter.setClassData(null);
+
+        // Detach ChildEventListener
+        if (mChildEventListener != null) {
+            mClassesDatabaseReference.removeEventListener(mChildEventListener);
+            mChildEventListener = null;
+        }
     }
 }

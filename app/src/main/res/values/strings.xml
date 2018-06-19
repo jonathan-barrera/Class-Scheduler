@@ -31,4 +31,7 @@
     <string name="new_class">New Class</string>
     <string name="main_menu">Main Menu</string>
     <string name="delete">Delete</string>
+    <string name="delete_student_dialog">Are you sure you want to permanently delete this student?</string>
+    <string name="return_button">Return</string>
+    <string name="student_deleted">Student Deleted</string>
 </resources>

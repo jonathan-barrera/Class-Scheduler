@@ -1,6 +1,7 @@
 package com.example.android.classscheduler;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -30,14 +31,10 @@ import timber.log.Timber;
 
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
-    // TODO Function to remove classes
-    // TODO Function to edit classes
     // TODO Database on the phone to save last viewed students/classes?
     // TODO (2) Build the Widget
     // TODO Change all strings to string variables
     // TODO Fix RTL formatting
-    // TODO (1) Build Firebase Authorization
-    // TODO (2) Have this authorization be linked to some "school/organization"?
     // TODO can add a list of enrolled students for each class
     // TODO have the list of classes for a student update in realtime (if one is deleted).
 
@@ -54,6 +51,8 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
 
+    private String mUserId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,9 +61,16 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
         // Bind views
         ButterKnife.bind(this);
 
+        // Get UserId
+        SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
+        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
+
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference classesDatabaseReference = mFirebaseDatabase.getReference().child("classes");
+        DatabaseReference classesDatabaseReference = mFirebaseDatabase.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("classes");
 
         // Get data from intent
         Intent intent = getIntent();

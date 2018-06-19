@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -105,6 +106,7 @@ public class EditStudentInfo extends AppCompatActivity
 
     // Variable for current student (if editing a student's information)
     private Student mCurrentStudent;
+    private String mUserId;
 
     // Boolean variable to keep track of whether user is editing a student or adding a new student
     private boolean isEditStudent;
@@ -189,6 +191,10 @@ public class EditStudentInfo extends AppCompatActivity
         // Bind the views
         ButterKnife.bind(this);
 
+        // Get Userid
+        SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
+        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
+
         // Initialize member variable lists
         mFullClassList = new ArrayList<>();
         mChosenClassesList = new ArrayList<>();
@@ -199,10 +205,19 @@ public class EditStudentInfo extends AppCompatActivity
 
         // Initialize Firebase references
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mStudentsDatabaseReference = mFirebaseDatabase.getReference().child("students");
-        mClassesDatabaseReference = mFirebaseDatabase.getReference().child("classes");
+        mStudentsDatabaseReference = mFirebaseDatabase.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("students");
+        mClassesDatabaseReference = mFirebaseDatabase.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("classes");
         mFirebaseStorage = FirebaseStorage.getInstance();
-        mStudentPhotosStorageReference = mFirebaseStorage.getReference().child("student_photos");
+        mStudentPhotosStorageReference = mFirebaseStorage.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("student_photos");
 
         // Get intent to see whether we are updating an old student or adding a new student
         mCurrentStudent = getIntent().getParcelableExtra(StudentProfile.STUDENT_EXTRA_KEY);
@@ -230,7 +245,6 @@ public class EditStudentInfo extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        Timber.d("onresume called");
         mFullClassList.clear();
         super.onResume();
 
@@ -765,6 +779,4 @@ public class EditStudentInfo extends AppCompatActivity
         // Show the Class Picker DialogFragment
         mClassPickerFragment.show(mFragmentManager, "Remove Classes");
     }
-
-
 }

@@ -2,6 +2,7 @@ package com.example.android.classscheduler;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -46,6 +47,7 @@ public class StudentProfile extends AppCompatActivity {
     private Student mCurrentStudent;
     private String mStudentId;
     private ArrayList<String> mChosenClassList;
+    private String mUserId;
 
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
@@ -82,6 +84,10 @@ public class StudentProfile extends AppCompatActivity {
         // Bind views
         ButterKnife.bind(this);
 
+        // Get UserId
+        SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
+        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
+
         // Retrieve the data sent with the intent
         Intent intent = getIntent();
         mStudentId = intent.getStringExtra(StudentAdapterAlt.STUDENT_ID_EXTRA_KEY);
@@ -89,13 +95,14 @@ public class StudentProfile extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Timber.d("onresume called");
         super.onResume();
 
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mStudentDatabaseReference = mFirebaseDatabase.getReference()
-                .child("students")
+                .child("users")
+                .child(mUserId)
+                .child(getString(R.string.students))
                 .child(mStudentId);
 
         //Populate the views with student data
@@ -146,10 +153,10 @@ public class StudentProfile extends AppCompatActivity {
         // Create an AlertDialog.Builder and set the message and click listeners for the positive
         // and negative buttons.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to permanently delete this student?");
+        builder.setMessage(R.string.delete_student_dialog);
 
         // Delete
-        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 deleteStudent();
@@ -157,7 +164,7 @@ public class StudentProfile extends AppCompatActivity {
         });
 
         // Don't delete
-        builder.setNegativeButton("Return", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.return_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (dialog != null) {
@@ -183,7 +190,7 @@ public class StudentProfile extends AppCompatActivity {
             mPhotoStorageReference.delete();
         }
 
-        Toast.makeText(StudentProfile.this, "Student Deleted", Toast.LENGTH_SHORT).show();
+        Toast.makeText(StudentProfile.this, R.string.student_deleted, Toast.LENGTH_SHORT).show();
 
         // Close activity
         finish();

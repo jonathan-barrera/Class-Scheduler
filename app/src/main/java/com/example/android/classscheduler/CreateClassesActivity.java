@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -89,6 +90,7 @@ public class CreateClassesActivity extends AppCompatActivity {
     private int mEndTimeHour;
     private String mEndTimeMinute;
     private int mCurrentSelectedDay;
+    private String mUserId;
 
     // Firebase Instances
     private FirebaseDatabase mFirebaseDatabase;
@@ -123,6 +125,10 @@ public class CreateClassesActivity extends AppCompatActivity {
         // Bind views
         ButterKnife.bind(this);
 
+        // Get UserId
+        SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
+        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
+
         // Set title
         setTitle("Create New Class");
 
@@ -137,7 +143,10 @@ public class CreateClassesActivity extends AppCompatActivity {
 
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("classes");
+        mDatabaseReference = mFirebaseDatabase.getReference()
+                .child("users")
+                .child(mUserId)
+                .child("classes");
 
         // Show back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
