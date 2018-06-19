@@ -83,9 +83,6 @@ import timber.log.Timber;
 public class EditStudentInfo extends AppCompatActivity
         implements ClassPickerFragment.onItemClickListener {
 
-    //TODO 1: add a class details view page
-    //TODO 2: stop user from adding the same class twice
-
     // List containing all classes offered by the school
     private ArrayList<String> mFullClassList;
 
@@ -751,10 +748,12 @@ public class EditStudentInfo extends AppCompatActivity
 
     // Helper method to add class title to Chosen Class List
     private void addTitleToChosenClassList(String classTitle) {
-        mChosenClassesList.add(classTitle);
-        String classList = TextUtils.join(", ", mChosenClassesList);
-        mStudentClassesTextView.setVisibility(View.VISIBLE);
-        mStudentClassesTextView.setText(classList);
+        if (!mChosenClassesList.contains(classTitle)) {
+            mChosenClassesList.add(classTitle);
+            String classList = TextUtils.join(", ", mChosenClassesList);
+            mStudentClassesTextView.setVisibility(View.VISIBLE);
+            mStudentClassesTextView.setText(classList);
+        }
     }
 
     // Method for opening Class Remover
@@ -766,4 +765,6 @@ public class EditStudentInfo extends AppCompatActivity
         // Show the Class Picker DialogFragment
         mClassPickerFragment.show(mFragmentManager, "Remove Classes");
     }
+
+
 }

@@ -13,44 +13,44 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.Model.Student;
 import com.example.android.classscheduler.data.StudentContract;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 
 import org.apache.commons.text.WordUtils;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by jonathanbarrera on 6/18/18.
+ * Created by jonathanbarrera on 6/11/18.
  */
 
-public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHolder> {
+public class StudentAdapterAlt extends FirebaseRecyclerAdapter<Student, StudentAdapterAlt.ViewHolder> {
 
     // Constants
     public static final String STUDENT_ID_EXTRA_KEY = "student-id-extra";
 
-    // Member variables
-    private List<Student> mStudentData;
-    onItemClickListener mCallback;
-
-    // Interface for dealing with click events
-    public interface onItemClickListener {
-        void onClassSelected(int position);
+    /**
+     * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
+     * {@link FirebaseRecyclerOptions} for configuration options.
+     *
+     * @param options
+     */
+    public StudentAdapterAlt(@NonNull FirebaseRecyclerOptions options) {
+        super(options);
     }
 
     @NonNull
     @Override
-    public StudentAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.student_list_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final StudentAdapter.ViewHolder holder, int position) {
+    protected void onBindViewHolder(@NonNull final ViewHolder holder, int position, @NonNull final Student currentStudent) {
         // Extract all of the information for the current student
-        final Student currentStudent = mStudentData.get(position);
         String studentName = WordUtils.capitalizeFully(currentStudent.getName());
         int studentSex = currentStudent.getSex();
         long studentBirthdate = currentStudent.getBirthdate();
@@ -95,22 +95,13 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
         holder.studentNameTV.getContext().startActivity(intent);
     }
 
-    @Override
-    public int getItemCount() {
-        if (mStudentData == null) {
-            return 0;
-        } else {
-            return mStudentData.size();
-        }
-    }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         @BindView(R.id.student_name_text_view) TextView studentNameTV;
         @BindView(R.id.student_sex_text_view) TextView studentSexTV;
         @BindView(R.id.student_age_text_view) TextView studentAgeTV;
-        @BindView(R.id.student_picture_image_view)
-        ImageView studentPictureIV;
+        @BindView(R.id.student_picture_image_view) ImageView studentPictureIV;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -119,9 +110,4 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
         }
     }
 
-    // Method for setting the Class data
-    public void setClassData(List<Student> studentList) {
-        mStudentData = studentList;
-        notifyDataSetChanged();
-    }
 }

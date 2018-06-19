@@ -29,9 +29,7 @@ import com.google.firebase.storage.StorageReference;
 
 import org.apache.commons.text.WordUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +40,7 @@ public class StudentProfile extends AppCompatActivity {
     // Constants
     public static final String STUDENT_EXTRA_KEY = "student-extra-key";
     public static final String CLASS_LIST_EXTRA_KEY = "class-list-extra-key";
+    public static final String STUDENT_NAME_EXTRA_KEY = "student-name-extra-key";
 
     // Member variables
     private Student mCurrentStudent;
@@ -85,7 +84,7 @@ public class StudentProfile extends AppCompatActivity {
 
         // Retrieve the data sent with the intent
         Intent intent = getIntent();
-        mStudentId = intent.getStringExtra(StudentAdapter.STUDENT_ID_EXTRA_KEY);
+        mStudentId = intent.getStringExtra(StudentAdapterAlt.STUDENT_ID_EXTRA_KEY);
     }
 
     @Override
@@ -197,7 +196,10 @@ public class StudentProfile extends AppCompatActivity {
         long birthdate = mCurrentStudent.getBirthdate();
         int grade = mCurrentStudent.getGrade();
         mChosenClassList = (ArrayList<String>) mCurrentStudent.getClasses();
-        String classes = TextUtils.join(", ", mChosenClassList);
+        String classes = "";
+        if (mChosenClassList != null) {
+            classes = TextUtils.join(", ", mChosenClassList);
+        }
         String photoUrl = mCurrentStudent.getPhotoUrl();
 
         // Populate views
@@ -210,6 +212,7 @@ public class StudentProfile extends AppCompatActivity {
         }
         mStudentClassesView.setText(classes);
 
+        // Get the sex of the student (male/female)
         String sexString;
         if (sex == StudentEntry.SEX_MALE) {
             sexString = getString(R.string.male);
@@ -242,6 +245,7 @@ public class StudentProfile extends AppCompatActivity {
     public void openClassDetailsActivity(View v) {
         Intent intent = new Intent(this, ClassDetailsActivity.class);
         intent.putStringArrayListExtra(CLASS_LIST_EXTRA_KEY, mChosenClassList);
+        intent.putExtra(STUDENT_NAME_EXTRA_KEY, mCurrentStudent.getName());
         startActivity(intent);
     }
 }

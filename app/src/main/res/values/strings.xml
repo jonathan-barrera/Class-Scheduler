@@ -29,4 +29,6 @@
     <string name="view_class_details">View Class Details</string>
     <string name="dismiss">Dismiss</string>
     <string name="new_class">New Class</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="delete">Delete</string>
 </resources>

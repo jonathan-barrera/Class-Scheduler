@@ -1,11 +1,15 @@
 package com.example.android.classscheduler;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.android.classscheduler.Model.SchoolClass;
 import com.google.firebase.database.ChildEventListener;
@@ -15,6 +19,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.apache.commons.text.WordUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class ClassDetailsActivity extends AppCompatActivity {
+public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
     // TODO Function to remove classes
     // TODO Function to edit classes
@@ -32,6 +38,8 @@ public class ClassDetailsActivity extends AppCompatActivity {
     // TODO Fix RTL formatting
     // TODO (1) Build Firebase Authorization
     // TODO (2) Have this authorization be linked to some "school/organization"?
+    // TODO can add a list of enrolled students for each class
+    // TODO have the list of classes for a student update in realtime (if one is deleted).
 
     // List to hold list of chosen class titles
     List<String> mChosenClassList;
@@ -54,16 +62,19 @@ public class ClassDetailsActivity extends AppCompatActivity {
         // Bind views
         ButterKnife.bind(this);
 
-        // Set Title
-        setTitle("Class Details");
-
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         DatabaseReference classesDatabaseReference = mFirebaseDatabase.getReference().child("classes");
 
         // Get data from intent
-        mChosenClassList = getIntent().getStringArrayListExtra(StudentProfile.CLASS_LIST_EXTRA_KEY);
+        Intent intent = getIntent();
+        mChosenClassList = intent.getStringArrayListExtra(StudentProfile.CLASS_LIST_EXTRA_KEY);
         mClassObjectList = new ArrayList<>();
+
+        // Set Title
+        String title = WordUtils.capitalizeFully(intent
+                .getStringExtra(StudentProfile.STUDENT_NAME_EXTRA_KEY)) + "'s Classes";
+        setTitle(title);
 
         // Set Layout Manager
         mClassDetailsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -71,6 +82,7 @@ public class ClassDetailsActivity extends AppCompatActivity {
         // Initialize adapter and set to Recycler View
         final SchoolClassAdapter schoolClassAdapter = new SchoolClassAdapter();
         mClassDetailsRecyclerView.setAdapter(schoolClassAdapter);
+        schoolClassAdapter.setClassData(mClassObjectList);
 
         // Use this data to download relevant SchoolClass objects from Firebase Database
         // Initialize Firebase instances
@@ -80,9 +92,8 @@ public class ClassDetailsActivity extends AppCompatActivity {
                 SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
                 if (mChosenClassList.contains(schoolClass.getTitle())) {
                     mClassObjectList.add(schoolClass);
+                    schoolClassAdapter.notifyDataSetChanged();
                 }
-                schoolClassAdapter.setClassData(mClassObjectList);
-                Timber.d("size of list is " + mChosenClassList.size());
             }
 
             @Override
@@ -105,5 +116,9 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onClassSelected(int position) {
     }
 }

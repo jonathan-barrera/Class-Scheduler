@@ -2,8 +2,12 @@ package com.example.android.classscheduler;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +23,7 @@ import com.example.android.classscheduler.Model.SchoolClass;
 import com.example.android.classscheduler.Model.Student;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,6 +32,9 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.android.classscheduler.DateUtils.getDayOfTheWeek;
+import static com.example.android.classscheduler.DateUtils.getFormattedTime;
 
 public class CreateClassesActivity extends AppCompatActivity {
 
@@ -118,12 +126,54 @@ public class CreateClassesActivity extends AppCompatActivity {
         // Set title
         setTitle("Create New Class");
 
+        // If this is an edit of an existing class, fill in the fields with the existing information
+        // Only do this if there is
+        if (getIntent().hasExtra(ClassListActivity.CLASS_OBJECT_FIREBASE_KEY)) {
+            fillInCurrentClassInfo();
+        }
+
         // Set onchecklisteners on checkboxes
         setOnCheckListeners();
 
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference().child("classes");
+
+        // Show back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    // Prompt user to confirm student deletion
+    private void showDeleteDialog() {
+        // Create an AlertDialog.Builder and set the message and click listeners for the positive
+        // and negative buttons.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to permanently delete this class?");
+
+        // Delete
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mDatabaseReference.child(mTitle).removeValue();
+                Toast.makeText(CreateClassesActivity.this, "Classes Deleted.", Toast.LENGTH_SHORT).show();
+
+                finish();
+            }
+        });
+
+        // Don't delete
+        builder.setNegativeButton("Return", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     @Override
@@ -137,8 +187,76 @@ public class CreateClassesActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_save_class) {
             saveNewClass();
             return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else if (item.getItemId() == R.id.action_delete_class) {
+            showDeleteDialog();
+            return true;
         }
         return false;
+    }
+
+    // Helper method to fill in fields with existing class information
+    private void fillInCurrentClassInfo() {
+        SchoolClass schoolClass = getIntent().getParcelableExtra(ClassListActivity.CLASS_OBJECT_FIREBASE_KEY);
+
+        mTitle = schoolClass.getTitle();
+        mTitleEditText.setText(mTitle);
+        mSubjectEditText.setText(schoolClass.getSubject());
+        mTeacherEditText.setText(schoolClass.getTeacher());
+
+        mClassTimesList = schoolClass.getSchedule();
+        for (int i = 0; i < mClassTimesList.size(); i++) {
+            fillInScheduleInfo(mClassTimesList.get(i));
+        }
+    }
+
+    // Helper method to fill in schedule info
+    private void fillInScheduleInfo(String schedule) {
+        String[] scheduleParts = schedule.split("/");
+
+        // Get start time
+        String startTime = getFormattedTime(scheduleParts[1]);
+        String endTime = getFormattedTime(scheduleParts[2]);
+        String time = startTime + "-" + endTime;
+
+        // Get day of the week
+        int dayOfWeek = Integer.parseInt(scheduleParts[0]);
+
+        // Populate views
+        switch (dayOfWeek) {
+            case SUNDAY_INT:
+                mSundayCheckBox.setChecked(true);
+                mSundayTimeTextView.setText(time);
+                break;
+            case MONDAY_INT:
+                mMondayCheckBox.setChecked(true);
+                mSaturdayTimeTextView.setText(time);
+                break;
+            case TUESDAY_INT:
+                mTuesdayCheckBox.setChecked(true);
+                mTuesdayTimeTextView.setText(time);
+                break;
+            case WEDNESDAY_INT:
+                mWednesdayCheckBox.setChecked(true);
+                mWednesdayTimeTextView.setText(time);
+                break;
+            case THURSDAY_INT:
+                mThursdayCheckBox.setChecked(true);
+                mThursdayTimeTextView.setText(time);
+                break;
+            case FRIDAY_INT:
+                mFridayCheckBox.setChecked(true);
+                mFridayTimeTextView.setText(time);
+                break;
+            case SATURDAY_INT:
+                mSaturdayCheckBox.setChecked(true);
+                mSaturdayTimeTextView.setText(time);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid day of the week integer: " + dayOfWeek);
+        }
     }
 
     // Helper method to save the new SchoolClass object
@@ -406,4 +524,5 @@ public class CreateClassesActivity extends AppCompatActivity {
                         mCurrentSelectedDay);
         }
     }
+
 }

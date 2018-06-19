@@ -10,7 +10,7 @@ import java.util.List;
  * Created by jonathanbarrera on 6/7/18.
  */
 
-public class Student implements Parcelable{
+public class Student implements Parcelable {
 
     // Variables to hold Student info
     private String mName;

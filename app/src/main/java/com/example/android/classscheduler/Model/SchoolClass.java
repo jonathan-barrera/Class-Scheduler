@@ -1,5 +1,9 @@
 package com.example.android.classscheduler.Model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,7 +11,7 @@ import java.util.List;
  * Object to hold a SchoolClass's (as in School SchoolClass) information
  */
 
-public class SchoolClass {
+public class SchoolClass implements Parcelable {
 
     // Variables to hold info
     private String mTitle;
@@ -34,4 +38,37 @@ public class SchoolClass {
     public void setTeacher(String teacher) { mTeacher = teacher; }
     public List<String> getSchedule() { return mSchedule; }
     public void setSchedule(List<String> schedule) { mSchedule = schedule; }
+
+    public static final Creator<SchoolClass> CREATOR = new Creator<SchoolClass>() {
+        @Override
+        public SchoolClass createFromParcel(Parcel in) {
+            return new SchoolClass(in);
+        }
+
+        @Override
+        public SchoolClass[] newArray(int size) {
+            return new SchoolClass[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mTitle);
+        dest.writeString(mSubject);
+        dest.writeString(mTeacher);
+        dest.writeStringList(mSchedule);
+    }
+
+    protected SchoolClass(Parcel in) {
+        mTitle = in.readString();
+        mSubject = in.readString();
+        mTeacher = in.readString();
+        mSchedule = new ArrayList<>();
+        in.readStringList(mSchedule);
+    }
 }

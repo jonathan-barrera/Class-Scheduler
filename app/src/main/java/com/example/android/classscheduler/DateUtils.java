@@ -64,4 +64,48 @@ public class DateUtils {
         long rightNow = System.currentTimeMillis();
         return chosenDate > rightNow;
     }
+
+    // Helper method to format times
+    public static String getFormattedTime(String time) {
+        String timeOfDay = "am";
+        String[] timeParts = time.split(":");
+        int hour = Integer.parseInt(timeParts[0]);
+
+        // Make sure the hours are formatted in 12 hour format, with proper am/pm label
+        if (hour > 12) {
+            hour = hour - 12;
+            timeOfDay = "pm";
+        } else if (hour == 12) {
+            timeOfDay = "pm";
+        } else if (hour == 0) {
+            hour = 12;
+        }
+
+        // Get the full formatted time string and return
+        String formattedTime = hour + ":" + timeParts[1] + timeOfDay;
+        return formattedTime;
+    }
+
+    // Helper method for getting the day of the week
+    public static String getDayOfTheWeek(String scheduleDay) {
+        int day = Integer.parseInt(scheduleDay);
+        switch (day) {
+            case CreateClassesActivity.SUNDAY_INT:
+                return "Sunday";
+            case CreateClassesActivity.MONDAY_INT:
+                return "Monday";
+            case CreateClassesActivity.TUESDAY_INT:
+                return "Tuesday";
+            case CreateClassesActivity.WEDNESDAY_INT:
+                return "Wednesday";
+            case CreateClassesActivity.THURSDAY_INT:
+                return "Thursday";
+            case CreateClassesActivity.FRIDAY_INT:
+                return "Friday";
+            case CreateClassesActivity.SATURDAY_INT:
+                return "Saturday";
+            default:
+                throw new IllegalArgumentException("Invalid day of the week integer: " + day);
+        }
+    }
 }

@@ -15,13 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StudentListActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity
+            android:name=".StudentListActivity"
+            android:parentActivityName=".MainMenu" />
         <activity
             android:name=".EditStudentInfo"
             android:parentActivityName=".StudentListActivity" />
@@ -48,10 +44,22 @@
         <activity
             android:name=".StudentProfile"
             android:label="@string/title_activity_student_profile"
+            android:launchMode="singleTop"
             android:parentActivityName=".StudentListActivity"
             android:theme="@style/AppTheme" />
         <activity android:name=".CreateClassesActivity" />
-        <activity android:name=".ClassDetailsActivity"></activity>
+        <activity
+            android:name=".ClassDetailsActivity"
+            android:parentActivityName=".StudentProfile" />
+        <activity android:name=".MainMenu">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ClassListActivity"
+            android:parentActivityName=".MainMenu"/>
     </application>
 
 </manifest>
