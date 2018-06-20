@@ -18,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.android.classscheduler.Model.Student;
+import com.example.android.classscheduler.model.Student;
 import com.example.android.classscheduler.data.StudentContract.StudentEntry;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,7 +34,6 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class StudentProfile extends AppCompatActivity {
 
@@ -90,7 +89,7 @@ public class StudentProfile extends AppCompatActivity {
 
         // Retrieve the data sent with the intent
         Intent intent = getIntent();
-        mStudentId = intent.getStringExtra(StudentAdapterAlt.STUDENT_ID_EXTRA_KEY);
+        mStudentId = intent.getStringExtra(StudentAdapter.STUDENT_ID_EXTRA_KEY);
     }
 
     @Override

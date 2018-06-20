@@ -6,18 +6,15 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.android.classscheduler.Model.SchoolClass;
+import com.example.android.classscheduler.model.SchoolClass;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnItemClick;
 
 import static com.example.android.classscheduler.DateUtils.getDayOfTheWeek;
 import static com.example.android.classscheduler.DateUtils.getFormattedTime;

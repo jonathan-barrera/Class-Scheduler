@@ -1,14 +1,11 @@
 package com.example.android.classscheduler;
 
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,21 +17,17 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.android.classscheduler.Model.SchoolClass;
-import com.example.android.classscheduler.Model.Student;
+import com.example.android.classscheduler.model.SchoolClass;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.example.android.classscheduler.DateUtils.getDayOfTheWeek;
 import static com.example.android.classscheduler.DateUtils.getFormattedTime;
 
 public class CreateClassesActivity extends AppCompatActivity {

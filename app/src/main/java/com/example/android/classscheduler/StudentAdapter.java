@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.android.classscheduler.Model.Student;
+import com.example.android.classscheduler.model.Student;
 import com.example.android.classscheduler.data.StudentContract;
 
 import org.apache.commons.text.WordUtils;

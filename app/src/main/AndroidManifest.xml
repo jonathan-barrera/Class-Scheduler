@@ -15,9 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".StudentListActivity"
             android:parentActivityName=".MainMenu" />
+
         <activity
             android:name=".EditStudentInfo"
             android:parentActivityName=".StudentListActivity" />
@@ -48,9 +50,11 @@
             android:parentActivityName=".StudentListActivity"
             android:theme="@style/AppTheme" />
         <activity android:name=".CreateClassesActivity" />
+
         <activity
             android:name=".ClassDetailsActivity"
             android:parentActivityName=".StudentProfile" />
+
         <activity android:name=".MainMenu">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,8 +62,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ClassListActivity"
-            android:parentActivityName=".MainMenu"/>
+
+        <activity
+            android:name=".ClassListActivity"
+            android:parentActivityName=".MainMenu" />
+
+        <receiver android:name=".widget.TodaysClassesWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/todays_classes_widget_info" />
+        </receiver>
+
+        <service android:name=".widget.TodaysClassesWidgetService"/>
     </application>
 
 </manifest>

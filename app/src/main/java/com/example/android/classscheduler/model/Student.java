@@ -1,4 +1,4 @@
-package com.example.android.classscheduler.Model;
+package com.example.android.classscheduler.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

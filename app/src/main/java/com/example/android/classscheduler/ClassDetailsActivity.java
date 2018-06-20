@@ -8,17 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.example.android.classscheduler.Model.SchoolClass;
+import com.example.android.classscheduler.model.SchoolClass;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.text.WordUtils;
 
@@ -27,7 +23,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
@@ -37,6 +32,11 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
     // TODO Fix RTL formatting
     // TODO can add a list of enrolled students for each class
     // TODO have the list of classes for a student update in realtime (if one is deleted).
+    // TODO check for scrolling/onsavedinstancestate mistakes
+    // TODO build a check for network connection
+    // TODO need to do signing configuration stuff
+    // TODO accessibility (content descriptions, etc.)
+
 
     // List to hold list of chosen class titles
     List<String> mChosenClassList;

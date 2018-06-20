@@ -1,6 +1,5 @@
 package com.example.android.classscheduler;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -13,12 +12,8 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-import com.example.android.classscheduler.Model.Student;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.example.android.classscheduler.model.Student;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
