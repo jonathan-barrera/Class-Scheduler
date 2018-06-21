@@ -11,25 +11,31 @@ import android.widget.RemoteViews;
 import com.example.android.classscheduler.MainMenu;
 import com.example.android.classscheduler.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Implementation of App Widget functionality.
  */
 public class TodaysClassesWidgetProvider extends AppWidgetProvider {
-
-    // TODO query the Classes database for classes that will occur today.
-    // TODO display these using a (listview? textview?)
-    // Update once every hour.
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
         // Construct the RemoteViews object
         RemoteViews widget = new RemoteViews(context.getPackageName(), R.layout.todays_classes_widget);
 
+        // Set day of the week
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE");
+        Date date = new Date();
+        String dayOfTheWeek = simpleDateFormat.format(date);
+        String widgetText = "Today's Classes (" + dayOfTheWeek + ")";
+        widget.setTextViewText(R.id.todays_classes_widget_text, widgetText);
+
         // Set list adapter
         Intent listIntent = new Intent(context, TodaysClassesWidgetService.class);
+        listIntent.putExtra("appwidgetid", appWidgetId);
         widget.setRemoteAdapter(R.id.todays_classes_widget_list_view, listIntent);
         widget.setEmptyView(R.id.todays_classes_widget_list_view, R.id.empty_view);
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.todays_classes_widget_list_view);
 
         // Intent to launch the app when clicked
         Intent launchIntent = new Intent(context, MainMenu.class);

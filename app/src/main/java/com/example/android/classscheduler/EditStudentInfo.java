@@ -619,7 +619,7 @@ public class EditStudentInfo extends AppCompatActivity
                 photoUrl = null;
             }
 
-            mFirebaseDatabase.getReference().child("students").child(studentId)
+            mStudentsDatabaseReference.child(studentId)
                     .setValue(new Student(studentName, studentSex, studentBirthdate, studentGrade,
                             mChosenClassesList, photoUrl, studentId));
 

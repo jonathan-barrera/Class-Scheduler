@@ -84,6 +84,8 @@ public class CreateClassesActivity extends AppCompatActivity {
     private String mEndTimeMinute;
     private int mCurrentSelectedDay;
     private String mUserId;
+    private boolean mIsEditClass;
+    private String mOldTitle;
 
     // Firebase Instances
     private FirebaseDatabase mFirebaseDatabase;
@@ -129,6 +131,7 @@ public class CreateClassesActivity extends AppCompatActivity {
         // Only do this if there is
         if (getIntent().hasExtra(ClassListActivity.CLASS_OBJECT_FIREBASE_KEY)) {
             fillInCurrentClassInfo();
+            mIsEditClass = true;
         }
 
         // Set onchecklisteners on checkboxes
@@ -204,6 +207,7 @@ public class CreateClassesActivity extends AppCompatActivity {
         SchoolClass schoolClass = getIntent().getParcelableExtra(ClassListActivity.CLASS_OBJECT_FIREBASE_KEY);
 
         mTitle = schoolClass.getTitle();
+        mOldTitle = schoolClass.getTitle();
         mTitleEditText.setText(mTitle);
         mSubjectEditText.setText(schoolClass.getSubject());
         mTeacherEditText.setText(schoolClass.getTeacher());
@@ -273,6 +277,10 @@ public class CreateClassesActivity extends AppCompatActivity {
 
         // Save to Firebase database
         mDatabaseReference.child(mTitle).setValue(schoolClass);
+
+        if (mIsEditClass) {
+            mDatabaseReference.child(mOldTitle).removeValue();
+        }
 
         // Close activity
         finish();

@@ -27,11 +27,8 @@ import butterknife.ButterKnife;
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
     // TODO Database on the phone to save last viewed students/classes?
-    // TODO (2) Build the Widget
     // TODO Change all strings to string variables
     // TODO Fix RTL formatting
-    // TODO can add a list of enrolled students for each class
-    // TODO have the list of classes for a student update in realtime (if one is deleted).
     // TODO check for scrolling/onsavedinstancestate mistakes
     // TODO build a check for network connection
     // TODO need to do signing configuration stuff

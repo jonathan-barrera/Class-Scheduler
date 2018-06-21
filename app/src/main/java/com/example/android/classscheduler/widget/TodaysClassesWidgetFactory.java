@@ -1,11 +1,13 @@
 package com.example.android.classscheduler.widget;
 
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -19,7 +21,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -30,86 +34,44 @@ import timber.log.Timber;
  * Created by jonathanbarrera on 6/19/18.
  */
 
-public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteViewsFactory {
+public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteViewsFactory, ValueEventListener {
 
     private Context mContext;
-    private int mWidgetId;
     private String mUserId;
+    private int mAppWidgetId;
     private List<String> mClassList;
-    private CountDownLatch mCountDownLatch;
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
 
 
     public TodaysClassesWidgetFactory(Context context, Intent intent) {
+        Log.d(getClass().getSimpleName(), "WidgetFactory called");
         // Get context
         mContext = context;
 
         // Initialize list
         mClassList = new ArrayList<>();
+        mAppWidgetId = intent.getIntExtra("appwidgetid", 0);
 
         // Initialize Firebase
         mFirebaseDatabase = FirebaseDatabase.getInstance();
     }
 
-//    private void populateListItem() {
-//        Timber.d("populateListItem flag");
-//
-//        mDatabaseReference.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//                SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
-//                mClassList.add(schoolClass.getTitle());
-//                Timber.d(schoolClass.getTitle() + "flag");
-//            }
-//
-//            @Override
-//            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-//            @Override
-//            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
-//            @Override
-//            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {}
-//        });
-//
-//    }
-
     @Override
     public void onCreate() {
+        Log.d(getClass().getSimpleName(), "OnCreate called");
     }
 
     @Override
     public void onDataSetChanged() {
-        //populateListItem();
-
-        //mCountDownLatch = new CountDownLatch(1);
-
+        Log.d(getClass().getSimpleName(),"ondatasetchanged called");
         getItems();
-
-//        // Get UserId
-//        SharedPreferences sharedPreferences = mContext.getSharedPreferences(MainMenu.SHARED_PREFS, Context.MODE_PRIVATE);
-//        mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
-//
-//        mDatabaseReference = mFirebaseDatabase.getReference()
-//                .child("users")
-//                .child(mUserId)
-//                .child("classes");
-//
-//        mDatabaseReference.addValueEventListener(this);
-//
-//        synchronized (this) {
-//            try {
-//                //this.wait();
-//                mCountDownLatch.await();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 
     private void getItems() {
+        Log.d(getClass().getSimpleName(), "getitems called");
+
         // Get UserId
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(MainMenu.SHARED_PREFS, Context.MODE_PRIVATE);
         mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
@@ -119,28 +81,55 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
                 .child(mUserId)
                 .child("classes");
 
-        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
-//                if (mCountDownLatch.getCount() != 0) {
-//                    mClassList.clear();
-//                }
+        mDatabaseReference.addValueEventListener(this);
 
-                for (DataSnapshot child : children) {
-                    mClassList.add(child.getValue(SchoolClass.class).getTitle());
-                }
-
-//                if (mCountDownLatch.getCount() != 0) {
-//                    mCountDownLatch.countDown();
-//                }
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+        }
+    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+    // Helper method for checking whether a classes schedule includes today
+    private boolean checkIfTodaysDateIncluded(List<String> scheduleList) {
+        for (int i = 0; i < scheduleList.size(); i++) {
+            String schedule = scheduleList.get(i);
+            String[] scheduleParts = schedule.split("/");
+            int scheduleDayOfWeek = Integer.parseInt(scheduleParts[0]);
+            int todayDayOfTheWeek = getDayOfTheWeekAsInteger();
+            if (scheduleDayOfWeek == todayDayOfTheWeek) {
+                return true;
             }
-        });
+        }
+        return false;
+    }
+
+    // Helper method for getting the day of the week as an integer
+    private int getDayOfTheWeekAsInteger() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE");
+        Date date = new Date();
+        String dayOfWeek = simpleDateFormat.format(date);
+
+        switch (dayOfWeek) {
+            case "Sunday":
+                return 1;
+            case "Monday":
+                return 2;
+            case "Tuesday":
+                return 3;
+            case "Wednesday":
+                return 4;
+            case "Thursday":
+                return 5;
+            case "Friday":
+                return 6;
+            case "Saturday":
+                return 7;
+            default:
+                throw new IllegalArgumentException("Illegal Day of the Week: " + dayOfWeek);
+        }
     }
 
     @Override
@@ -185,20 +174,27 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
         return true;
     }
 
-//    @Override
-//    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//        mClassList.clear();
-//        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//            SchoolClass schoolClass = snapshot.getValue(SchoolClass.class);
-//            mClassList.add(schoolClass.getTitle());
-//        }
-//        synchronized (this) {
-//            this.notify();
-//        }
-//    }
-//
-//    @Override
-//    public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//    }
+    @Override
+    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        Log.d(getClass().getSimpleName(), "ondatachange called");
+        Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+
+        for (DataSnapshot child : children) {
+            SchoolClass schoolClass = child.getValue(SchoolClass.class);
+            List<String> schedule = schoolClass.getSchedule();
+            if (checkIfTodaysDateIncluded(schedule)) {
+                mClassList.add(schoolClass.getTitle());
+
+            }
+        }
+
+        synchronized (this) {
+            this.notify();
+        }
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+    }
 }
