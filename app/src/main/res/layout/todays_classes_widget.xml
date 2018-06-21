@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Class Scheduler"
+        android:text="@string/class_scheduler"
         android:textColor="#4a4949"
         android:textSize="18sp" />
 
@@ -38,7 +38,7 @@
 
     <TextView
         android:id="@+id/empty_view"
-        android:text="No Classes"
+        android:text="@string/no_classes"
         android:textColor="#4a4949"
         android:textStyle="italic"
         android:layout_width="wrap_content"

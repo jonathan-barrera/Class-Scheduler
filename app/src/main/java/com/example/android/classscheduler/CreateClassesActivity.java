@@ -28,7 +28,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.example.android.classscheduler.DateUtils.getFormattedTime;
+import static com.example.android.classscheduler.utils.DateUtils.getFormattedTime;
 
 public class CreateClassesActivity extends AppCompatActivity {
 
@@ -125,7 +125,7 @@ public class CreateClassesActivity extends AppCompatActivity {
         mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
 
         // Set title
-        setTitle("Create New Class");
+        setTitle(getString(R.string.create_new_class));
 
         // If this is an edit of an existing class, fill in the fields with the existing information
         // Only do this if there is
@@ -140,9 +140,9 @@ public class CreateClassesActivity extends AppCompatActivity {
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("classes");
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_CLASSES);
 
         // Show back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -153,21 +153,21 @@ public class CreateClassesActivity extends AppCompatActivity {
         // Create an AlertDialog.Builder and set the message and click listeners for the positive
         // and negative buttons.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to permanently delete this class?");
+        builder.setMessage(R.string.are_you_sure_delete_class_dialog);
 
         // Delete
-        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mDatabaseReference.child(mTitle).removeValue();
-                Toast.makeText(CreateClassesActivity.this, "Classes Deleted.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CreateClassesActivity.this, R.string.class_deleted, Toast.LENGTH_SHORT).show();
 
                 finish();
             }
         });
 
         // Don't delete
-        builder.setNegativeButton("Return", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.return_dialog, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (dialog != null) {
@@ -238,7 +238,7 @@ public class CreateClassesActivity extends AppCompatActivity {
                 break;
             case MONDAY_INT:
                 mMondayCheckBox.setChecked(true);
-                mSaturdayTimeTextView.setText(time);
+                mMondayTimeTextView.setText(time);
                 break;
             case TUESDAY_INT:
                 mTuesdayCheckBox.setChecked(true);
@@ -293,22 +293,22 @@ public class CreateClassesActivity extends AppCompatActivity {
         mTeacher = mTeacherEditText.getText().toString().trim();
 
         if (TextUtils.isEmpty(mTitle)) {
-            Toast.makeText(this, "Please enter a valid title.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.please_enter_valid_title, Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(mSubject)) {
-            Toast.makeText(this, "Please enter a valid subject.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.please_enter_valid_subject, Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(mTeacher)) {
-            Toast.makeText(this, "Please enter a valid teacher.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.please_enter_valid_teacher, Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (mClassTimesList.size() == 0) {
-            Toast.makeText(this, "Please enter schedule times.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.please_enter_schedule_times, Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -340,7 +340,7 @@ public class CreateClassesActivity extends AppCompatActivity {
 
         TimePickerDialog timePickerDialog = new TimePickerDialog(CreateClassesActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog_NoActionBar, myTimeListener, hour, minute, false);
-        timePickerDialog.setTitle("Choose Start Time:");
+        timePickerDialog.setTitle(getString(R.string.choose_start_time));
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         timePickerDialog.show();
     }
@@ -378,7 +378,7 @@ public class CreateClassesActivity extends AppCompatActivity {
 
         TimePickerDialog timePickerDialog = new TimePickerDialog(CreateClassesActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog_NoActionBar, myTimeListener, hour, minute, false);
-        timePickerDialog.setTitle("Choose End Time:");
+        timePickerDialog.setTitle(getString(R.string.choose_end_time));
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         timePickerDialog.show();
     }
@@ -406,7 +406,7 @@ public class CreateClassesActivity extends AppCompatActivity {
                 mFridayTimeTextView.setText(timeInterval);
                 break;
             case SATURDAY_INT:
-                mSundayTimeTextView.setText(timeInterval);
+                mSaturdayTimeTextView.setText(timeInterval);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Day of the Week integer: " +
@@ -527,7 +527,7 @@ public class CreateClassesActivity extends AppCompatActivity {
                 mFridayTimeTextView.setText(null);
                 break;
             case SATURDAY_INT:
-                mSundayTimeTextView.setText(null);
+                mSaturdayTimeTextView.setText(null);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Day of the Week integer: " +

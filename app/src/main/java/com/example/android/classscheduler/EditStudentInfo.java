@@ -40,7 +40,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.model.SchoolClass;
 import com.example.android.classscheduler.model.Student;
-import com.example.android.classscheduler.data.StudentContract.StudentEntry;
+import com.example.android.classscheduler.utils.BitmapUtils;
+import com.example.android.classscheduler.utils.DateUtils;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -74,6 +75,14 @@ import timber.log.Timber;
 public class EditStudentInfo extends AppCompatActivity
         implements ClassPickerFragment.onItemClickListener {
 
+    // App Constants
+    public static final int SEX_MALE_INT = 0;
+    public static final int SEX_FEMALE_INT = 1;
+    public static final String FIREBASE_CHILD_KEY_USERS = "users";
+    public static final String FIREBASE_CHILD_KEY_STUDENTS = "students";
+    public static final String FIREBASE_CHILD_KEY_CLASSES = "classes";
+    public static final String FIREBASE_CHILD_KEY_STUDENT_PHOTOS = "student_photos";
+
     // List containing all classes offered by the school
     private ArrayList<String> mFullClassList;
 
@@ -89,7 +98,7 @@ public class EditStudentInfo extends AppCompatActivity
     private ClassPickerFragment mClassPickerFragment;
 
     // Integer variable to keep track of the student's sex. Put male as the default.
-    private int mStudentSex = StudentEntry.SEX_MALE;
+    private int mStudentSex = SEX_MALE_INT;
 
     // Integer variable to keep track of student's birthdate
     private long mStudentBirthdate;
@@ -174,7 +183,6 @@ public class EditStudentInfo extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Timber.d("oncreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_student_info);
 
@@ -196,28 +204,28 @@ public class EditStudentInfo extends AppCompatActivity
         // Initialize Firebase references
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mStudentsDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("students");
+                .child(FIREBASE_CHILD_KEY_STUDENTS);
         mClassesDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("classes");
+                .child(FIREBASE_CHILD_KEY_CLASSES);
         mFirebaseStorage = FirebaseStorage.getInstance();
         mStudentPhotosStorageReference = mFirebaseStorage.getReference()
-                .child("users")
+                .child(FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("student_photos");
+                .child(FIREBASE_CHILD_KEY_STUDENT_PHOTOS);
 
         // Get intent to see whether we are updating an old student or adding a new student
         mCurrentStudent = getIntent().getParcelableExtra(StudentProfile.STUDENT_EXTRA_KEY);
 
         if (mCurrentStudent != null) {
-            setTitle("Edit Profile");
+            setTitle(getString(R.string.edit_profile));
             isEditStudent = true;
             fillInCurrentStudentInfo();
         } else {
-            setTitle("Add Student");
+            setTitle(getString(R.string.add_student));
         }
 
         // Set up the spinner
@@ -329,11 +337,11 @@ public class EditStudentInfo extends AppCompatActivity
 
         // Set student sex spinner
         switch (sex) {
-            case StudentEntry.SEX_MALE:
-                mStudentSexSpinner.setSelection(StudentEntry.SEX_MALE);
+            case SEX_MALE_INT:
+                mStudentSexSpinner.setSelection(SEX_MALE_INT);
                 break;
-            case StudentEntry.SEX_FEMALE:
-                mStudentSexSpinner.setSelection(StudentEntry.SEX_FEMALE);
+            case SEX_FEMALE_INT:
+                mStudentSexSpinner.setSelection(SEX_FEMALE_INT);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid sex");
@@ -427,7 +435,7 @@ public class EditStudentInfo extends AppCompatActivity
         // Pick photo
         if (requestCode == PICK_PHOTO_GALLERY && resultCode == Activity.RESULT_OK) {
             if (data == null) {
-                Toast.makeText(this, "Error selecting photo.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.error_selecting_photo, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -477,10 +485,10 @@ public class EditStudentInfo extends AppCompatActivity
                 String selection = (String) parent.getItemAtPosition(position);
                 switch (selection) {
                     case SEX_MALE:
-                        mStudentSex = StudentEntry.SEX_MALE;
+                        mStudentSex = SEX_MALE_INT;
                         break;
                     case SEX_FEMALE:
-                        mStudentSex = StudentEntry.SEX_FEMALE;
+                        mStudentSex = SEX_FEMALE_INT;
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid Student Sex");
@@ -636,32 +644,32 @@ public class EditStudentInfo extends AppCompatActivity
 
         // Check for valid student name
         if (TextUtils.isEmpty(studentName)) {
-            Toast.makeText(this, "Please enter a valid name.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.please_enter_valid_name, Toast.LENGTH_SHORT).show();
             mStudentNameEditText.requestFocus();
             return false;
         }
 
         // Check for valid student birthdate
         if (mStudentBirthdate == 0) {
-            Toast.makeText(this, "Please enter a valid birthdate.",
+            Toast.makeText(this, R.string.please_enter_valid_birthdate,
                     Toast.LENGTH_SHORT).show();
             return false;
         }
         if (DateUtils.isChosenDateAfterToday(mStudentBirthdate)) {
-            Toast.makeText(this, "Please enter a valid birthdate.",
+            Toast.makeText(this, R.string.please_enter_valid_birthdate,
                     Toast.LENGTH_SHORT).show();
             return false;
         }
 
         // Check for valid student grade
         if (TextUtils.isEmpty(studentGradeString)) {
-            Toast.makeText(this, "Please enter a valid grade.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.please_enter_valid_grade, Toast.LENGTH_SHORT).show();
             mStudentGradeEditText.requestFocus();
             return false;
         } else {
             int studentGrade = Integer.parseInt(studentGradeString);
             if (studentGrade <= 0) {
-                Toast.makeText(this, "Please enter a valid grade.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.please_enter_valid_grade, Toast.LENGTH_SHORT).show();
                 mStudentGradeEditText.requestFocus();
                 return false;
             }
@@ -672,7 +680,6 @@ public class EditStudentInfo extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        Timber.d("onbackpressed called " + mChangesMade);
         if (!mChangesMade) {
             super.onBackPressed();
             return;
@@ -684,14 +691,13 @@ public class EditStudentInfo extends AppCompatActivity
 
     // Inform the user that there are unsaved changes to the student's information
     private void showUnsavedChangesDialog() {
-        Timber.d("showUnsavedChangesDialog called");
         // Create an AlertDialog.Builder and set the message and click listeners for the positive
         // and negative buttons.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("You have unsaved changes. Would you like to leave this page?");
+        builder.setMessage(R.string.you_have_unsaved_messages_dialog);
 
         // Leave the page if user clicks "Leave"
-        builder.setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.leave, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 finish();
@@ -699,7 +705,7 @@ public class EditStudentInfo extends AppCompatActivity
         });
 
         // Stay on the page if user clicks "Stay"
-        builder.setNegativeButton("Stay", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.stay, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (dialog != null) {
@@ -720,7 +726,7 @@ public class EditStudentInfo extends AppCompatActivity
         bundle.putStringArrayList(FULL_CLASS_LIST_KEY, mFullClassList);
         mClassPickerFragment.setArguments(bundle);
         // Show the Class Picker DialogFragment.
-        mClassPickerFragment.show(mFragmentManager, "Add Classes");
+        mClassPickerFragment.show(mFragmentManager, getString(R.string.add_classes));
     }
 
     // Method to open the Create Classes Activity
@@ -767,6 +773,6 @@ public class EditStudentInfo extends AppCompatActivity
         bundle.putStringArrayList(CHOSEN_CLASS_LIST_KEY, mChosenClassesList);
         mClassPickerFragment.setArguments(bundle);
         // Show the Class Picker DialogFragment
-        mClassPickerFragment.show(mFragmentManager, "Remove Classes");
+        mClassPickerFragment.show(mFragmentManager, getString(R.string.remove_classes));
     }
 }

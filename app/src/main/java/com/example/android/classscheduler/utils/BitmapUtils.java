@@ -1,4 +1,4 @@
-package com.example.android.classscheduler;
+package com.example.android.classscheduler.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -45,7 +45,7 @@ public class BitmapUtils {
     }
 
     // Helper method for creating a temporary file to hold the image
-    static File createTempImageFile(Context context) throws IOException {
+    public static File createTempImageFile(Context context) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";

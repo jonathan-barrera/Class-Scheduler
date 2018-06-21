@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.model.Student;
-import com.example.android.classscheduler.data.StudentContract;
+import com.example.android.classscheduler.utils.DateUtils;
 
 import org.apache.commons.text.WordUtils;
 
@@ -20,6 +20,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.android.classscheduler.EditStudentInfo.SEX_MALE_INT;
 
 /**
  * Created by jonathanbarrera on 6/18/18.
@@ -57,7 +59,7 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
         String studentPictureUrl = currentStudent.getPhotoUrl();
 
         String studentSexString;
-        if (studentSex == StudentContract.StudentEntry.SEX_MALE) {
+        if (studentSex == SEX_MALE_INT) {
             studentSexString = holder.itemView.getContext().getResources().getString(R.string.male);
         } else {
             studentSexString = holder.itemView.getContext().getResources().getString(R.string.female);

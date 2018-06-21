@@ -63,7 +63,6 @@ public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        Timber.d("Fragment oncreateview called");
         // Inflate view
         View rootView = inflater.inflate(R.layout.fragment_class_picker, container, false);
 
@@ -92,7 +91,7 @@ public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
         mClassPickerListView.setAdapter(mAdapter);
 
         // Set query hint in search view
-        mClassPickerSearchView.setQueryHint("Search Class");
+        mClassPickerSearchView.setQueryHint(getString(R.string.search_class));
 
         mClassPickerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

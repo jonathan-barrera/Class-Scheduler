@@ -26,14 +26,11 @@ import butterknife.ButterKnife;
 
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
-    // TODO Database on the phone to save last viewed students/classes?
-    // TODO Change all strings to string variables
-    // TODO Fix RTL formatting
-    // TODO check for scrolling/onsavedinstancestate mistakes
+    // TODO check for onsavedinstancestate
     // TODO build a check for network connection
     // TODO need to do signing configuration stuff
     // TODO accessibility (content descriptions, etc.)
-
+    // TODO fix bug: classes that are deleted should be removed from students' class lists
 
     // List to hold list of chosen class titles
     List<String> mChosenClassList;
@@ -65,9 +62,9 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         DatabaseReference classesDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("classes");
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_CLASSES);
 
         // Get data from intent
         Intent intent = getIntent();
@@ -76,7 +73,7 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
 
         // Set Title
         String title = WordUtils.capitalizeFully(intent
-                .getStringExtra(StudentProfile.STUDENT_NAME_EXTRA_KEY)) + "'s Classes";
+                .getStringExtra(StudentProfile.STUDENT_NAME_EXTRA_KEY)) + getString(R.string.s_classes);
         setTitle(title);
 
         // Set Layout Manager

@@ -1,5 +1,7 @@
 package com.example.android.classscheduler;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -16,8 +18,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.example.android.classscheduler.DateUtils.getDayOfTheWeek;
-import static com.example.android.classscheduler.DateUtils.getFormattedTime;
+import static com.example.android.classscheduler.utils.DateUtils.getDayOfTheWeek;
+import static com.example.android.classscheduler.utils.DateUtils.getFormattedTime;
 
 /**
  * Created by jonathanbarrera on 6/15/18.
@@ -50,11 +52,13 @@ public class SchoolClassAdapter extends RecyclerView.Adapter<SchoolClassAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull final SchoolClassAdapter.SchoolClassAdapterViewHolder holder, final int position) {
+        Resources resources = holder.mClassTitleTextView.getContext().getResources();
+
         // Extract information from the SchoolClass object
         SchoolClass currentClass = mClassData.get(position);
         String title = currentClass.getTitle();
-        String subject = "Subject: " + currentClass.getSubject();
-        String teacher = "Teacher: " + currentClass.getTeacher();
+        String subject = resources.getString(R.string.subject) + ": " + currentClass.getSubject();
+        String teacher = resources.getString(R.string.teacher) + ": " + currentClass.getTeacher();
         List<String> scheduleList = currentClass.getSchedule();
         String schedule = formatSchedule(scheduleList);
 

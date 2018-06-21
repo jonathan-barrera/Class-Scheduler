@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,8 +19,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.android.classscheduler.model.Student;
-import com.example.android.classscheduler.data.StudentContract.StudentEntry;
-import com.google.firebase.database.ChildEventListener;
+import com.example.android.classscheduler.utils.DateUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,6 +34,11 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.android.classscheduler.EditStudentInfo.FIREBASE_CHILD_KEY_STUDENTS;
+import static com.example.android.classscheduler.EditStudentInfo.FIREBASE_CHILD_KEY_USERS;
+import static com.example.android.classscheduler.EditStudentInfo.SEX_FEMALE_INT;
+import static com.example.android.classscheduler.EditStudentInfo.SEX_MALE_INT;
 
 public class StudentProfile extends AppCompatActivity {
 
@@ -101,9 +104,9 @@ public class StudentProfile extends AppCompatActivity {
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mStudentDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("students")
+                .child(FIREBASE_CHILD_KEY_STUDENTS)
                 .child(mStudentId);
 
         //Populate the views with student data
@@ -222,9 +225,9 @@ public class StudentProfile extends AppCompatActivity {
 
         // Get the sex of the student (male/female)
         String sexString;
-        if (sex == StudentEntry.SEX_MALE) {
+        if (sex == SEX_MALE_INT) {
             sexString = getString(R.string.male);
-        } else if (sex == StudentEntry.SEX_FEMALE) {
+        } else if (sex == SEX_FEMALE_INT) {
             sexString = getString(R.string.female);
         } else {
             throw new IllegalArgumentException("Invalid sex");
@@ -251,6 +254,11 @@ public class StudentProfile extends AppCompatActivity {
 
     // Method for opening the Class Details page
     public void openClassDetailsActivity(View v) {
+        // Don't take User to class details activity if there are no classes listed
+        if (mChosenClassList == null) {
+            Toast.makeText(this, R.string.no_classes_to_show, Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(this, ClassDetailsActivity.class);
         intent.putStringArrayListExtra(CLASS_LIST_EXTRA_KEY, mChosenClassList);
         intent.putExtra(STUDENT_NAME_EXTRA_KEY, mCurrentStudent.getName());

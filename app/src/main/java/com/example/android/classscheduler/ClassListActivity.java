@@ -66,9 +66,9 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mClassesDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("classes");
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_CLASSES);
 
         // Get data from intent
         mClassObjectList = new ArrayList<>();

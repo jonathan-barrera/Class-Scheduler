@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import com.example.android.classscheduler.EditStudentInfo;
 import com.example.android.classscheduler.MainMenu;
 import com.example.android.classscheduler.R;
 import com.example.android.classscheduler.model.SchoolClass;
@@ -38,7 +39,6 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
 
     private Context mContext;
     private String mUserId;
-    private int mAppWidgetId;
     private List<String> mClassList;
 
     private FirebaseDatabase mFirebaseDatabase;
@@ -46,40 +46,33 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
 
 
     public TodaysClassesWidgetFactory(Context context, Intent intent) {
-        Log.d(getClass().getSimpleName(), "WidgetFactory called");
         // Get context
         mContext = context;
 
         // Initialize list
         mClassList = new ArrayList<>();
-        mAppWidgetId = intent.getIntExtra("appwidgetid", 0);
 
         // Initialize Firebase
         mFirebaseDatabase = FirebaseDatabase.getInstance();
     }
 
     @Override
-    public void onCreate() {
-        Log.d(getClass().getSimpleName(), "OnCreate called");
-    }
+    public void onCreate() {}
 
     @Override
     public void onDataSetChanged() {
-        Log.d(getClass().getSimpleName(),"ondatasetchanged called");
         getItems();
     }
 
     private void getItems() {
-        Log.d(getClass().getSimpleName(), "getitems called");
-
         // Get UserId
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(MainMenu.SHARED_PREFS, Context.MODE_PRIVATE);
         mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
 
         mDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("classes");
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_CLASSES);
 
         mDatabaseReference.addValueEventListener(this);
 
@@ -176,7 +169,6 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
 
     @Override
     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        Log.d(getClass().getSimpleName(), "ondatachange called");
         Iterable<DataSnapshot> children = dataSnapshot.getChildren();
 
         for (DataSnapshot child : children) {
@@ -195,6 +187,5 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
 
     @Override
     public void onCancelled(@NonNull DatabaseError databaseError) {
-
     }
 }

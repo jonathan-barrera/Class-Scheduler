@@ -14,7 +14,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="cursive"
         android:textStyle="bold"
-        android:text="Welcome to Class Scheduler!"
+        android:text="@string/welcome_to_class_scheduler"
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

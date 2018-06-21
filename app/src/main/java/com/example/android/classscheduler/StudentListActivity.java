@@ -60,9 +60,9 @@ public class StudentListActivity extends AppCompatActivity {
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mStudentDatabaseReference = mFirebaseDatabase.getReference()
-                .child("users")
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_USERS)
                 .child(mUserId)
-                .child("students");
+                .child(EditStudentInfo.FIREBASE_CHILD_KEY_STUDENTS);
 
         // Find a reference to the recyclerview
         mRecyclerView = findViewById(R.id.student_recycler_view);
@@ -146,7 +146,6 @@ public class StudentListActivity extends AppCompatActivity {
                 for (int i = 0; i < mStudentList.size(); i++) {
                     Student student = mStudentList.get(i);
                     String title = student.getName();
-                    Timber.d(title + "flag");
                     if ((title.toLowerCase()).contains(newText.toLowerCase().trim())) {
                         mMatchedStudentList.add(student);
                         mAdapter.notifyDataSetChanged();

@@ -28,12 +28,11 @@ public class TodaysClassesWidgetProvider extends AppWidgetProvider {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE");
         Date date = new Date();
         String dayOfTheWeek = simpleDateFormat.format(date);
-        String widgetText = "Today's Classes (" + dayOfTheWeek + ")";
+        String widgetText = context.getString(R.string.todays_classes) + " (" + dayOfTheWeek + ")";
         widget.setTextViewText(R.id.todays_classes_widget_text, widgetText);
 
         // Set list adapter
         Intent listIntent = new Intent(context, TodaysClassesWidgetService.class);
-        listIntent.putExtra("appwidgetid", appWidgetId);
         widget.setRemoteAdapter(R.id.todays_classes_widget_list_view, listIntent);
         widget.setEmptyView(R.id.todays_classes_widget_list_view, R.id.empty_view);
 

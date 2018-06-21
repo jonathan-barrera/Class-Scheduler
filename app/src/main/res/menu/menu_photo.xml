@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/photo_gallery_action"
-        android:title="Photo Gallery"
+        android:title="@string/photo_gallery"
         android:icon="@drawable/ic_baseline_photo_library_24px"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/camera_action"
-        android:title="Camera"
+        android:title="@string/camera"
         android:icon="@drawable/ic_baseline_photo_camera_24px"
         app:showAsAction="never"/>
 

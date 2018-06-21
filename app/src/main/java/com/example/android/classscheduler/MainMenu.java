@@ -122,9 +122,9 @@ public class MainMenu extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(this, "Sign in successful.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.sign_in_successful, Toast.LENGTH_SHORT).show();
             } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(this, "Sign in canceled.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.sign_in_canceled, Toast.LENGTH_SHORT).show();
                 finish();
             }
         }

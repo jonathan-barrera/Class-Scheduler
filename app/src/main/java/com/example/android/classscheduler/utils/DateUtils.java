@@ -1,6 +1,8 @@
-package com.example.android.classscheduler;
+package com.example.android.classscheduler.utils;
 
 import android.app.IntentService;
+
+import com.example.android.classscheduler.CreateClassesActivity;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
