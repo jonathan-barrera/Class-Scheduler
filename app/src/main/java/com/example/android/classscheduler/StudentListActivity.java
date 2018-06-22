@@ -2,6 +2,7 @@ package com.example.android.classscheduler;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -14,11 +15,11 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.android.classscheduler.model.Student;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +32,19 @@ public class StudentListActivity extends AppCompatActivity {
     private StudentAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private String mUserId;
+    private Parcelable mSavedState;
 
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mStudentDatabaseReference;
-    private ChildEventListener mChildEventListener;
+    private ValueEventListener mValueEventListener;
 
     // List of Student Objects
     private List<Student> mStudentList;
     private List<Student> mMatchedStudentList;
+
+    // Keys
+    public static final String BUNDLE_RECYCLER_VIEW_KEY = "bundle-recycler-view-key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,35 +85,21 @@ public class StudentListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // Use this data to download relevant SchoolClass objects from Firebase Database
-        // Initialize Firebase instances
-        if (mChildEventListener == null) {
-            mChildEventListener = new ChildEventListener() {
+
+        // Query Database for Student info
+        if (mValueEventListener == null) {
+            mValueEventListener = new ValueEventListener() {
                 @Override
-                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                    Student student = dataSnapshot.getValue(Student.class);
-                    for (int i = 0; i < mStudentList.size(); i++) {
-                        if (mStudentList.get(i).getStudentId().equals(student.getStudentId())) {
-                            return;
-                        }
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+
+                    for (DataSnapshot child : children) {
+                        Student student = child.getValue(Student.class);
+                        mStudentList.add(student);
                     }
-                    mStudentList.add(student);
+
                     mAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                    mRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
                 }
 
                 @Override
@@ -117,7 +108,7 @@ public class StudentListActivity extends AppCompatActivity {
                 }
             };
 
-            mStudentDatabaseReference.addChildEventListener(mChildEventListener);
+            mStudentDatabaseReference.addValueEventListener(mValueEventListener);
         }
     }
 
@@ -171,10 +162,28 @@ public class StudentListActivity extends AppCompatActivity {
         // Clear Student Object list
         mStudentList.clear();
 
-        // Detach ChildEventListener
-        if (mChildEventListener != null) {
-            mStudentDatabaseReference.removeEventListener(mChildEventListener);
-            mChildEventListener = null;
+        if (mValueEventListener != null) {
+            mStudentDatabaseReference.removeEventListener(mValueEventListener);
+            mValueEventListener = null;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_VIEW_KEY, mRecyclerView.getLayoutManager().
+                onSaveInstanceState());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            mSavedState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_VIEW_KEY);
+            if (mSavedState != null) {
+                mRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
+            }
+
         }
     }
 }

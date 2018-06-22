@@ -90,6 +90,7 @@ public class TodaysClassesWidgetFactory implements RemoteViewsService.RemoteView
         for (int i = 0; i < scheduleList.size(); i++) {
             String schedule = scheduleList.get(i);
             String[] scheduleParts = schedule.split("/");
+            // TODO fix bug here
             int scheduleDayOfWeek = Integer.parseInt(scheduleParts[0]);
             int todayDayOfTheWeek = getDayOfTheWeekAsInteger();
             if (scheduleDayOfWeek == todayDayOfTheWeek) {

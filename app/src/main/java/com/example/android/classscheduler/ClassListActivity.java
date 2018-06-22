@@ -2,6 +2,7 @@ package com.example.android.classscheduler;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -14,17 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.android.classscheduler.model.SchoolClass;
+import com.example.android.classscheduler.model.Student;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.android.classscheduler.StudentListActivity.BUNDLE_RECYCLER_VIEW_KEY;
 
 /**
  * Activity for showing the full list of classes offered.
@@ -41,6 +46,7 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     // Member variables
     private SchoolClassAdapter mAdapter;
     private String mUserId;
+    private Parcelable mSavedState;
 
     // Views
     @BindView(R.id.class_list_recycler_view)
@@ -49,7 +55,7 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mClassesDatabaseReference;
-    private ChildEventListener mChildEventListener;
+    private ValueEventListener mValueEventLister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,30 +95,21 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     @Override
     protected void onResume() {
         super.onResume();
-        // Use this data to download relevant SchoolClass objects from Firebase Database
-        // Initialize Firebase instances
-        if (mChildEventListener == null) {
-            mChildEventListener = new ChildEventListener() {
+
+        // Query firebase database for class info
+        if (mValueEventLister == null) {
+            mValueEventLister = new ValueEventListener() {
                 @Override
-                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                    SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
-                    mClassObjectList.add(schoolClass);
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+
+                    for (DataSnapshot child : children) {
+                        SchoolClass schoolClass = child.getValue(SchoolClass.class);
+                        mClassObjectList.add(schoolClass);
+                    }
+
                     mAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                    mClassListRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
                 }
 
                 @Override
@@ -120,7 +117,8 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
 
                 }
             };
-            mClassesDatabaseReference.addChildEventListener(mChildEventListener);
+
+            mClassesDatabaseReference.addValueEventListener(mValueEventLister);
         }
     }
 
@@ -183,10 +181,29 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
         // Clear Class Object List
         mClassObjectList.clear();
 
-        // Detach ChildEventListener
-        if (mChildEventListener != null) {
-            mClassesDatabaseReference.removeEventListener(mChildEventListener);
-            mChildEventListener = null;
+        // Detach ValueEventListener
+        if (mValueEventLister != null) {
+            mClassesDatabaseReference.removeEventListener(mValueEventLister);
+            mValueEventLister = null;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_VIEW_KEY, mClassListRecyclerView.getLayoutManager().
+                onSaveInstanceState());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            mSavedState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_VIEW_KEY);
+            if (mSavedState != null) {
+                mClassListRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
+            }
+
         }
     }
 }

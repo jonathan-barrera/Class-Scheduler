@@ -23,7 +23,9 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +33,17 @@ import butterknife.ButterKnife;
 import static com.example.android.classscheduler.utils.DateUtils.getFormattedTime;
 
 public class CreateClassesActivity extends AppCompatActivity {
+
+    // Keys
+    private static final String SCHEDULE_LIST_KEY = "schedule-list-key";
+//    private static final String TEXT_VIEW_TEXT_BUNDLE_KEY = "bundle-key";
+//    private static final String SUNDAY_TEXT_VIEW_KEY = "sundayTimeTextView";
+//    private static final String MONDAY_TEXT_VIEW_KEY = "mondayTimeTextView";
+//    private static final String TUESDAY_TEXT_VIEW_KEY = "tuesdayTimeTextView";
+//    private static final String WEDNESDAY_TEXT_VIEW_KEY = "wednesdayTimeTextView";
+//    private static final String THURSDAY_TEXT_VIEW_KEY = "thursdayTimeTextView";
+//    private static final String FRIDAY_TEXT_VIEW_KEY = "fridayTimeTextView";
+//    private static final String SATURDAY_TEXT_VIEW_KEY = "saturdayTimeTextView";
 
     // Constants
     public static final int SUNDAY_INT = 1;
@@ -104,7 +117,9 @@ public class CreateClassesActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         getCurrentSelectedDay(buttonView);
-                        getStartTime();
+                        if (isSelectedDayTextViewEmpty()) {
+                            getStartTime();
+                        }
                     } else {
                         // If a day is unchecked, remove the time that was saved for it
                         removeTimeFromSelectedDay(buttonView);
@@ -134,9 +149,6 @@ public class CreateClassesActivity extends AppCompatActivity {
             mIsEditClass = true;
         }
 
-        // Set onchecklisteners on checkboxes
-        setOnCheckListeners();
-
         // Initialize Firebase instances
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference()
@@ -146,6 +158,14 @@ public class CreateClassesActivity extends AppCompatActivity {
 
         // Show back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Set onchecklisteners on checkboxes
+        setOnCheckListeners();
     }
 
     // Prompt user to confirm student deletion
@@ -213,55 +233,78 @@ public class CreateClassesActivity extends AppCompatActivity {
         mTeacherEditText.setText(schoolClass.getTeacher());
 
         mClassTimesList = schoolClass.getSchedule();
-        for (int i = 0; i < mClassTimesList.size(); i++) {
-            fillInScheduleInfo(mClassTimesList.get(i));
+        fillInScheduleInfo();
+    }
+
+    // Helper method for determining if there is already a time for a selected day
+    private boolean isSelectedDayTextViewEmpty() {
+        switch(mCurrentSelectedDay) {
+            case SUNDAY_INT:
+                return TextUtils.isEmpty(mSundayTimeTextView.getText());
+            case MONDAY_INT:
+                return TextUtils.isEmpty(mMondayTimeTextView.getText());
+            case TUESDAY_INT:
+                return TextUtils.isEmpty(mTuesdayTimeTextView.getText());
+            case WEDNESDAY_INT:
+                return TextUtils.isEmpty(mWednesdayTimeTextView.getText());
+            case THURSDAY_INT:
+                return TextUtils.isEmpty(mThursdayTimeTextView.getText());
+            case FRIDAY_INT:
+                return TextUtils.isEmpty(mFridayTimeTextView.getText());
+            case SATURDAY_INT:
+                return TextUtils.isEmpty(mSaturdayTimeTextView.getText());
+            default:
+                throw new IllegalArgumentException("Invalid day of the week integer: " + mCurrentSelectedDay);
         }
     }
 
     // Helper method to fill in schedule info
-    private void fillInScheduleInfo(String schedule) {
-        String[] scheduleParts = schedule.split("/");
+    private void fillInScheduleInfo() {
 
-        // Get start time
-        String startTime = getFormattedTime(scheduleParts[1]);
-        String endTime = getFormattedTime(scheduleParts[2]);
-        String time = startTime + "-" + endTime;
+        for (int i = 0; i < mClassTimesList.size(); i++) {
+            String[] scheduleParts = mClassTimesList.get(i).split("/");
 
-        // Get day of the week
-        int dayOfWeek = Integer.parseInt(scheduleParts[0]);
+            // Get start time
+            String startTime = getFormattedTime(scheduleParts[1]);
+            String endTime = getFormattedTime(scheduleParts[2]);
+            String time = startTime + "-" + endTime;
 
-        // Populate views
-        switch (dayOfWeek) {
-            case SUNDAY_INT:
-                mSundayCheckBox.setChecked(true);
-                mSundayTimeTextView.setText(time);
-                break;
-            case MONDAY_INT:
-                mMondayCheckBox.setChecked(true);
-                mMondayTimeTextView.setText(time);
-                break;
-            case TUESDAY_INT:
-                mTuesdayCheckBox.setChecked(true);
-                mTuesdayTimeTextView.setText(time);
-                break;
-            case WEDNESDAY_INT:
-                mWednesdayCheckBox.setChecked(true);
-                mWednesdayTimeTextView.setText(time);
-                break;
-            case THURSDAY_INT:
-                mThursdayCheckBox.setChecked(true);
-                mThursdayTimeTextView.setText(time);
-                break;
-            case FRIDAY_INT:
-                mFridayCheckBox.setChecked(true);
-                mFridayTimeTextView.setText(time);
-                break;
-            case SATURDAY_INT:
-                mSaturdayCheckBox.setChecked(true);
-                mSaturdayTimeTextView.setText(time);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid day of the week integer: " + dayOfWeek);
+            // Get day of the week
+            int dayOfWeek = Integer.parseInt(scheduleParts[0]);
+
+            // Populate views
+            switch (dayOfWeek) {
+                case SUNDAY_INT:
+                    mSundayCheckBox.setChecked(true);
+                    mSundayTimeTextView.setText(time);
+                    break;
+                case MONDAY_INT:
+                    mMondayCheckBox.setChecked(true);
+                    mMondayTimeTextView.setText(time);
+                    break;
+                case TUESDAY_INT:
+                    mTuesdayCheckBox.setChecked(true);
+                    mTuesdayTimeTextView.setText(time);
+                    break;
+                case WEDNESDAY_INT:
+                    mWednesdayCheckBox.setChecked(true);
+                    mWednesdayTimeTextView.setText(time);
+                    break;
+                case THURSDAY_INT:
+                    mThursdayCheckBox.setChecked(true);
+                    mThursdayTimeTextView.setText(time);
+                    break;
+                case FRIDAY_INT:
+                    mFridayCheckBox.setChecked(true);
+                    mFridayTimeTextView.setText(time);
+                    break;
+                case SATURDAY_INT:
+                    mSaturdayCheckBox.setChecked(true);
+                    mSaturdayTimeTextView.setText(time);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid day of the week integer: " + dayOfWeek);
+            }
         }
     }
 
@@ -443,7 +486,7 @@ public class CreateClassesActivity extends AppCompatActivity {
             timeOfDayEnd = "pm";
         }
 
-        return startTimeHour + ":" + startTimeMin + timeOfDayStart + " - " +
+        return startTimeHour + ":" + startTimeMin + timeOfDayStart + "-" +
                 endTimeHour + ":" + endTimeMin + timeOfDayEnd;
     }
 
@@ -535,4 +578,121 @@ public class CreateClassesActivity extends AppCompatActivity {
         }
     }
 
+//    // Get text from Time Text Views for each day of the week
+//    private Bundle getTextViewTexts() {
+//        Bundle bundle = new Bundle();
+//
+//        if (!TextUtils.isEmpty(mSundayTimeTextView.getText())) {
+//            bundle.putString(SUNDAY_TEXT_VIEW_KEY, mSundayTimeTextView.getText().toString());
+//        }
+//
+//        if (!TextUtils.isEmpty(mMondayTimeTextView.getText())) {
+//            bundle.putString(MONDAY_TEXT_VIEW_KEY, mMondayTimeTextView.getText().toString());
+//        }
+//
+//        if (!TextUtils.isEmpty(mTuesdayTimeTextView.getText())) {
+//            bundle.putString(TUESDAY_TEXT_VIEW_KEY, mTuesdayTimeTextView.getText().toString());
+//        }
+//
+//        if (!TextUtils.isEmpty(mWednesdayTimeTextView.getText())) {
+//            bundle.putString(WEDNESDAY_TEXT_VIEW_KEY, mWednesdayTimeTextView.getText().toString());
+//        }
+//
+//        if (!TextUtils.isEmpty(mThursdayTimeTextView.getText())) {
+//            bundle.putString(THURSDAY_TEXT_VIEW_KEY, mThursdayTimeTextView.getText().toString());
+//        }
+//
+//        if (!TextUtils.isEmpty(mFridayTimeTextView.getText())) {
+//            bundle.putString(FRIDAY_TEXT_VIEW_KEY, mFridayTimeTextView.getText().toString());
+//        }
+//
+//        if (!TextUtils.isEmpty(mSaturdayTimeTextView.getText())) {
+//            bundle.putString(SATURDAY_TEXT_VIEW_KEY, mSaturdayTimeTextView.getText().toString());
+//        }
+//
+//        return bundle;
+//    }
+//
+//    // Helper method for getting times from Class List
+//    private Bundle getClassListTimes() {
+//        Bundle bundle = new Bundle();
+//
+//        for (int i = 0; i < mClassTimesList.size(); i++) {
+//            String schedule = mClassTimesList.get(i);
+//            String[] scheduleParts = schedule.split("/");
+//
+//            switch(Integer.parseInt(scheduleParts[0])){
+//                case SUNDAY_INT:
+//                    bundle.putString(SUNDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//                case MONDAY_INT:
+//                    bundle.putString(MONDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//                case TUESDAY_INT:
+//                    bundle.putString(TUESDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//                case WEDNESDAY_INT:
+//                    bundle.putString(WEDNESDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//                case THURSDAY_INT:
+//                    bundle.putString(THURSDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//                case FRIDAY_INT:
+//                    bundle.putString(FRIDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//                case SATURDAY_INT:
+//                    bundle.putString(SATURDAY_TEXT_VIEW_KEY, schedule);
+//                    break;
+//            }
+//        }
+//
+//        return bundle;
+//    }
+//
+//    // Helper method for filling in the time text views
+//    private void fillInTimeTextViews(Bundle bundle) {
+//        if (bundle.containsKey(SUNDAY_TEXT_VIEW_KEY)) {
+//            mSundayTimeTextView.setText(bundle.getString(SUNDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(SUNDAY_TEXT_VIEW_KEY));
+//        }
+//        if (bundle.containsKey(MONDAY_TEXT_VIEW_KEY)) {
+//            mMondayTimeTextView.setText(bundle.getString(MONDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(MONDAY_TEXT_VIEW_KEY));
+//        }
+//        if (bundle.containsKey(TUESDAY_TEXT_VIEW_KEY)) {
+//            mTuesdayTimeTextView.setText(bundle.getString(TUESDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(TUESDAY_TEXT_VIEW_KEY));
+//        }
+//        if (bundle.containsKey(WEDNESDAY_TEXT_VIEW_KEY)) {
+//            mWednesdayTimeTextView.setText(bundle.getString(WEDNESDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(WEDNESDAY_TEXT_VIEW_KEY));
+//        }
+//        if (bundle.containsKey(THURSDAY_TEXT_VIEW_KEY)) {
+//            mThursdayTimeTextView.setText(bundle.getString(THURSDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(THURSDAY_TEXT_VIEW_KEY));
+//        }
+//        if (bundle.containsKey(FRIDAY_TEXT_VIEW_KEY)) {
+//            mFridayTimeTextView.setText(bundle.getString(FRIDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(FRIDAY_TEXT_VIEW_KEY));
+//        }
+//        if (bundle.containsKey(SATURDAY_TEXT_VIEW_KEY)) {
+//            mSaturdayTimeTextView.setText(bundle.getString(SATURDAY_TEXT_VIEW_KEY));
+//            mClassTimesList.add(bundle.getString(SATURDAY_TEXT_VIEW_KEY));
+//        }
+//    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList(SCHEDULE_LIST_KEY, (ArrayList<String>) mClassTimesList);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            mClassTimesList = savedInstanceState.getStringArrayList(SCHEDULE_LIST_KEY);
+            fillInScheduleInfo();
+        }
+    }
 }

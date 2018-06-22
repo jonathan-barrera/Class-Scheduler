@@ -2,6 +2,7 @@ package com.example.android.classscheduler;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -10,11 +11,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.example.android.classscheduler.model.SchoolClass;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.text.WordUtils;
 
@@ -24,13 +25,15 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.example.android.classscheduler.StudentListActivity.BUNDLE_RECYCLER_VIEW_KEY;
+
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
+    // TODO accessibility (content descriptions, etc.)
     // TODO check for onsavedinstancestate
     // TODO build a check for network connection
     // TODO need to do signing configuration stuff
-    // TODO accessibility (content descriptions, etc.)
-    // TODO fix bug: classes that are deleted should be removed from students' class lists
+    // TODO class is deleted or edited, how to update student?
 
     // List to hold list of chosen class titles
     List<String> mChosenClassList;
@@ -45,7 +48,9 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
 
+    // Member variables
     private String mUserId;
+    private Parcelable mSavedState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,29 +91,19 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
 
         // Use this data to download relevant SchoolClass objects from Firebase Database
         // Initialize Firebase instances
-        classesDatabaseReference.addChildEventListener(new ChildEventListener() {
+        classesDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                SchoolClass schoolClass = dataSnapshot.getValue(SchoolClass.class);
-                if (mChosenClassList.contains(schoolClass.getTitle())) {
-                    mClassObjectList.add(schoolClass);
-                    schoolClassAdapter.notifyDataSetChanged();
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+
+                for (DataSnapshot child : children) {
+                    SchoolClass schoolClass = child.getValue(SchoolClass.class);
+                    if (mChosenClassList.contains(schoolClass.getTitle())) {
+                        mClassObjectList.add(schoolClass);
+                    }
                 }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                schoolClassAdapter.notifyDataSetChanged();
+                mClassDetailsRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
             }
 
             @Override
@@ -120,5 +115,24 @@ public class ClassDetailsActivity extends AppCompatActivity implements SchoolCla
 
     @Override
     public void onClassSelected(int position) {
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_VIEW_KEY, mClassDetailsRecyclerView.getLayoutManager().
+                onSaveInstanceState());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            mSavedState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_VIEW_KEY);
+            if (mSavedState != null) {
+                mClassDetailsRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
+            }
+
+        }
     }
 }
