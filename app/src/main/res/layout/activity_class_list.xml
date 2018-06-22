@@ -26,8 +26,18 @@
         />
 
     <TextView
-        android:id="@+id/class_list_empty_text_view"
+        android:visibility="gone"
+        android:textSize="18sp"
+        android:id="@+id/class_list_empty_view"
+        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        tools:text="No internet connection."/>
+
+    <ProgressBar
+        android:id="@+id/class_list_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
 
 </RelativeLayout>

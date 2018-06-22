@@ -30,10 +30,8 @@ import static com.example.android.classscheduler.StudentListActivity.BUNDLE_RECY
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
     // TODO accessibility (content descriptions, etc.)
-    // TODO check for onsavedinstancestate
     // TODO build a check for network connection
     // TODO need to do signing configuration stuff
-    // TODO class is deleted or edited, how to update student?
 
     // List to hold list of chosen class titles
     List<String> mChosenClassList;

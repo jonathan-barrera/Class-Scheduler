@@ -1,7 +1,10 @@
 package com.example.android.classscheduler;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +16,8 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.classscheduler.model.SchoolClass;
 import com.example.android.classscheduler.model.Student;
@@ -51,6 +56,10 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     // Views
     @BindView(R.id.class_list_recycler_view)
     RecyclerView mClassListRecyclerView;
+    @BindView(R.id.class_list_empty_view)
+    TextView mEmptyView;
+    @BindView(R.id.class_list_progress_bar)
+    ProgressBar mProgressBar;
 
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
@@ -96,6 +105,11 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     protected void onResume() {
         super.onResume();
 
+        if (!checkNetworkConnectivity()) {
+            mProgressBar.setVisibility(View.GONE);
+            showEmptyTextView();
+        }
+
         // Query firebase database for class info
         if (mValueEventLister == null) {
             mValueEventLister = new ValueEventListener() {
@@ -108,8 +122,13 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
                         mClassObjectList.add(schoolClass);
                     }
 
+                    mProgressBar.setVisibility(View.GONE);
                     mAdapter.notifyDataSetChanged();
                     mClassListRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
+
+                    if (mClassObjectList == null || mClassObjectList.size() == 0) {
+                        showEmptyTextView();
+                    }
                 }
 
                 @Override
@@ -204,6 +223,28 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
                 mClassListRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
             }
 
+        }
+    }
+
+    // Method for checking network connectivity
+    private boolean checkNetworkConnectivity() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+    // Method for showing the empty text view
+    private void showEmptyTextView() {
+        if (mAdapter.getItemCount() == 0) {
+            mEmptyView.setVisibility(View.VISIBLE);
+
+            if (!checkNetworkConnectivity()) {
+                mEmptyView.setText(R.string.no_internet_connection);
+            } else {
+                mEmptyView.setText(R.string.no_students_found);
+            }
         }
     }
 }

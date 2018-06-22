@@ -71,4 +71,6 @@
     <string name="camera">Camera</string>
     <string name="edit">Edit</string>
     <string name="no_classes_to_show">No classes to show.</string>
+    <string name="no_internet_connection">No internet connection.</string>
+    <string name="no_students_found">No students found.</string>
 </resources>

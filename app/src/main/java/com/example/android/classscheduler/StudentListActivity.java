@@ -1,7 +1,10 @@
 package com.example.android.classscheduler;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +16,8 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.classscheduler.model.Student;
 import com.google.firebase.database.DataSnapshot;
@@ -24,15 +29,24 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class StudentListActivity extends AppCompatActivity {
 
     // Member variables
     private StudentAdapter mAdapter;
-    private RecyclerView mRecyclerView;
     private String mUserId;
     private Parcelable mSavedState;
+
+    // Views
+    @BindView(R.id.student_recycler_view)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.student_list_empty_view)
+    TextView mEmptyView;
+    @BindView(R.id.student_list_progress_bar)
+    ProgressBar mProgressBar;
 
     // Firebase instances
     private FirebaseDatabase mFirebaseDatabase;
@@ -54,6 +68,9 @@ public class StudentListActivity extends AppCompatActivity {
         // Change the title to "Students"
         setTitle(getString(R.string.students));
 
+        // BindViews
+        ButterKnife.bind(this);
+
         // Get the UserId
         SharedPreferences sharedPreferences = getSharedPreferences(MainMenu.SHARED_PREFS, MODE_PRIVATE);
         mUserId = sharedPreferences.getString(MainMenu.USER_ID_SHARED_PREF_KEY, null);
@@ -69,9 +86,6 @@ public class StudentListActivity extends AppCompatActivity {
                 .child(mUserId)
                 .child(EditStudentInfo.FIREBASE_CHILD_KEY_STUDENTS);
 
-        // Find a reference to the recyclerview
-        mRecyclerView = findViewById(R.id.student_recycler_view);
-
         // Set a layoutmanager to the recyclerview
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -85,6 +99,10 @@ public class StudentListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        if (!checkNetworkConnectivity()) {
+            mProgressBar.setVisibility(View.GONE);
+            showEmptyTextView();
+        }
 
         // Query Database for Student info
         if (mValueEventListener == null) {
@@ -98,16 +116,19 @@ public class StudentListActivity extends AppCompatActivity {
                         mStudentList.add(student);
                     }
 
+                    mProgressBar.setVisibility(View.GONE);
                     mAdapter.notifyDataSetChanged();
                     mRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
+
+                    if (mStudentList == null || mStudentList.size() == 0) {
+                        showEmptyTextView();
+                    }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
                 }
             };
-
             mStudentDatabaseReference.addValueEventListener(mValueEventListener);
         }
     }
@@ -184,6 +205,26 @@ public class StudentListActivity extends AppCompatActivity {
                 mRecyclerView.getLayoutManager().onRestoreInstanceState(mSavedState);
             }
 
+        }
+    }
+
+    // Method for checking network connectivity
+    private boolean checkNetworkConnectivity() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+    // Method for showing the empty text view
+    private void showEmptyTextView() {
+        mEmptyView.setVisibility(View.VISIBLE);
+
+        if (!checkNetworkConnectivity()) {
+            mEmptyView.setText(R.string.no_internet_connection);
+        } else {
+            mEmptyView.setText(R.string.no_students_found);
         }
     }
 }
