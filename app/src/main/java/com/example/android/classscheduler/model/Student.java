@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Created by jonathanbarrera on 6/7/18.
+ * Object to hold a Student's information
  */
 
 public class Student implements Parcelable {

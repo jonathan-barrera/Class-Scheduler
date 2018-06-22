@@ -13,6 +13,7 @@ import timber.log.Timber;
 
 /**
  * Created by jonathanbarrera on 6/10/18.
+ * Util functions for retrieving and formatting dates
  */
 
 public class DateUtils {
@@ -84,8 +85,7 @@ public class DateUtils {
         }
 
         // Get the full formatted time string and return
-        String formattedTime = hour + ":" + timeParts[1] + timeOfDay;
-        return formattedTime;
+        return hour + ":" + timeParts[1] + timeOfDay;
     }
 
     // Helper method for getting the day of the week

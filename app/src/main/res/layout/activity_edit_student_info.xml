@@ -11,6 +11,7 @@
         android:layout_height="wrap_content">
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:contentDescription="@string/add_photo"
             android:id="@+id/gray_circle_background_view"
             android:layout_width="240dp"
             android:layout_height="240dp"
@@ -267,10 +268,11 @@
                         android:textSize="@dimen/student_edit_text_size" />
 
                     <TextView
+                        android:layout_marginRight="4dp"
+                        android:layout_marginEnd="4dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground"
-                        android:paddingRight="4dp"
                         android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         android:layout_width="wrap_content"

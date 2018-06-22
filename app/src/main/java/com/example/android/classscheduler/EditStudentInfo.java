@@ -70,7 +70,10 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
+
+/**
+ * Activity for editing a Student's info (or adding a new Student)
+ */
 
 public class EditStudentInfo extends AppCompatActivity
         implements ClassPickerFragment.onItemClickListener {

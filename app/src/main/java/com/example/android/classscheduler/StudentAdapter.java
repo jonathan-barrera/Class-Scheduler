@@ -34,12 +34,6 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
 
     // Member variables
     private List<Student> mStudentData;
-    onItemClickListener mCallback;
-
-    // Interface for dealing with click events
-    public interface onItemClickListener {
-        void onClassSelected(int position);
-    }
 
     @NonNull
     @Override

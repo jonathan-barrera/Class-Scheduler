@@ -32,18 +32,14 @@ import butterknife.ButterKnife;
 
 import static com.example.android.classscheduler.utils.DateUtils.getFormattedTime;
 
+/**
+ * Activity for creating and saving new classes (SchoolClass objects)
+ */
+
 public class CreateClassesActivity extends AppCompatActivity {
 
     // Keys
     private static final String SCHEDULE_LIST_KEY = "schedule-list-key";
-//    private static final String TEXT_VIEW_TEXT_BUNDLE_KEY = "bundle-key";
-//    private static final String SUNDAY_TEXT_VIEW_KEY = "sundayTimeTextView";
-//    private static final String MONDAY_TEXT_VIEW_KEY = "mondayTimeTextView";
-//    private static final String TUESDAY_TEXT_VIEW_KEY = "tuesdayTimeTextView";
-//    private static final String WEDNESDAY_TEXT_VIEW_KEY = "wednesdayTimeTextView";
-//    private static final String THURSDAY_TEXT_VIEW_KEY = "thursdayTimeTextView";
-//    private static final String FRIDAY_TEXT_VIEW_KEY = "fridayTimeTextView";
-//    private static final String SATURDAY_TEXT_VIEW_KEY = "saturdayTimeTextView";
 
     // Constants
     public static final int SUNDAY_INT = 1;
@@ -577,109 +573,6 @@ public class CreateClassesActivity extends AppCompatActivity {
                         mCurrentSelectedDay);
         }
     }
-
-//    // Get text from Time Text Views for each day of the week
-//    private Bundle getTextViewTexts() {
-//        Bundle bundle = new Bundle();
-//
-//        if (!TextUtils.isEmpty(mSundayTimeTextView.getText())) {
-//            bundle.putString(SUNDAY_TEXT_VIEW_KEY, mSundayTimeTextView.getText().toString());
-//        }
-//
-//        if (!TextUtils.isEmpty(mMondayTimeTextView.getText())) {
-//            bundle.putString(MONDAY_TEXT_VIEW_KEY, mMondayTimeTextView.getText().toString());
-//        }
-//
-//        if (!TextUtils.isEmpty(mTuesdayTimeTextView.getText())) {
-//            bundle.putString(TUESDAY_TEXT_VIEW_KEY, mTuesdayTimeTextView.getText().toString());
-//        }
-//
-//        if (!TextUtils.isEmpty(mWednesdayTimeTextView.getText())) {
-//            bundle.putString(WEDNESDAY_TEXT_VIEW_KEY, mWednesdayTimeTextView.getText().toString());
-//        }
-//
-//        if (!TextUtils.isEmpty(mThursdayTimeTextView.getText())) {
-//            bundle.putString(THURSDAY_TEXT_VIEW_KEY, mThursdayTimeTextView.getText().toString());
-//        }
-//
-//        if (!TextUtils.isEmpty(mFridayTimeTextView.getText())) {
-//            bundle.putString(FRIDAY_TEXT_VIEW_KEY, mFridayTimeTextView.getText().toString());
-//        }
-//
-//        if (!TextUtils.isEmpty(mSaturdayTimeTextView.getText())) {
-//            bundle.putString(SATURDAY_TEXT_VIEW_KEY, mSaturdayTimeTextView.getText().toString());
-//        }
-//
-//        return bundle;
-//    }
-//
-//    // Helper method for getting times from Class List
-//    private Bundle getClassListTimes() {
-//        Bundle bundle = new Bundle();
-//
-//        for (int i = 0; i < mClassTimesList.size(); i++) {
-//            String schedule = mClassTimesList.get(i);
-//            String[] scheduleParts = schedule.split("/");
-//
-//            switch(Integer.parseInt(scheduleParts[0])){
-//                case SUNDAY_INT:
-//                    bundle.putString(SUNDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//                case MONDAY_INT:
-//                    bundle.putString(MONDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//                case TUESDAY_INT:
-//                    bundle.putString(TUESDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//                case WEDNESDAY_INT:
-//                    bundle.putString(WEDNESDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//                case THURSDAY_INT:
-//                    bundle.putString(THURSDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//                case FRIDAY_INT:
-//                    bundle.putString(FRIDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//                case SATURDAY_INT:
-//                    bundle.putString(SATURDAY_TEXT_VIEW_KEY, schedule);
-//                    break;
-//            }
-//        }
-//
-//        return bundle;
-//    }
-//
-//    // Helper method for filling in the time text views
-//    private void fillInTimeTextViews(Bundle bundle) {
-//        if (bundle.containsKey(SUNDAY_TEXT_VIEW_KEY)) {
-//            mSundayTimeTextView.setText(bundle.getString(SUNDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(SUNDAY_TEXT_VIEW_KEY));
-//        }
-//        if (bundle.containsKey(MONDAY_TEXT_VIEW_KEY)) {
-//            mMondayTimeTextView.setText(bundle.getString(MONDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(MONDAY_TEXT_VIEW_KEY));
-//        }
-//        if (bundle.containsKey(TUESDAY_TEXT_VIEW_KEY)) {
-//            mTuesdayTimeTextView.setText(bundle.getString(TUESDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(TUESDAY_TEXT_VIEW_KEY));
-//        }
-//        if (bundle.containsKey(WEDNESDAY_TEXT_VIEW_KEY)) {
-//            mWednesdayTimeTextView.setText(bundle.getString(WEDNESDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(WEDNESDAY_TEXT_VIEW_KEY));
-//        }
-//        if (bundle.containsKey(THURSDAY_TEXT_VIEW_KEY)) {
-//            mThursdayTimeTextView.setText(bundle.getString(THURSDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(THURSDAY_TEXT_VIEW_KEY));
-//        }
-//        if (bundle.containsKey(FRIDAY_TEXT_VIEW_KEY)) {
-//            mFridayTimeTextView.setText(bundle.getString(FRIDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(FRIDAY_TEXT_VIEW_KEY));
-//        }
-//        if (bundle.containsKey(SATURDAY_TEXT_VIEW_KEY)) {
-//            mSaturdayTimeTextView.setText(bundle.getString(SATURDAY_TEXT_VIEW_KEY));
-//            mClassTimesList.add(bundle.getString(SATURDAY_TEXT_VIEW_KEY));
-//        }
-//    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

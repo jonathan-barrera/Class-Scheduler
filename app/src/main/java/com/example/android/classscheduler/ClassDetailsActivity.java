@@ -27,11 +27,11 @@ import butterknife.ButterKnife;
 
 import static com.example.android.classscheduler.StudentListActivity.BUNDLE_RECYCLER_VIEW_KEY;
 
-public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
+/**
+ * Activity for displaying the details for all of the classes a student is in
+ */
 
-    // TODO accessibility (content descriptions, etc.)
-    // TODO build a check for network connection
-    // TODO need to do signing configuration stuff
+public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
     // List to hold list of chosen class titles
     List<String> mChosenClassList;

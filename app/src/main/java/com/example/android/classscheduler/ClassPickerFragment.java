@@ -25,6 +25,7 @@ import timber.log.Timber;
 
 /**
  * Created by jonathanbarrera on 6/13/18.
+ * Popup fragment that allows users to choose classes to add to a student's class list
  */
 
 public class ClassPickerFragment extends android.support.v4.app.DialogFragment {
