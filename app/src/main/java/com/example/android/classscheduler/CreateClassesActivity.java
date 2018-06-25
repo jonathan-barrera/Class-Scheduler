@@ -166,6 +166,13 @@ public class CreateClassesActivity extends AppCompatActivity {
 
     // Prompt user to confirm student deletion
     private void showDeleteDialog() {
+
+        // If the class is a new class, you don't need to delete, so just exit the activity
+        if (!mIsEditClass) {
+            finish();
+            return;
+        }
+
         // Create an AlertDialog.Builder and set the message and click listeners for the positive
         // and negative buttons.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -311,15 +318,15 @@ public class CreateClassesActivity extends AppCompatActivity {
             return;
         }
 
+        if (mIsEditClass) {
+            mDatabaseReference.child(mOldTitle).removeValue();
+        }
+
         // Create new SchoolClass object
         SchoolClass schoolClass = new SchoolClass(mTitle, mSubject, mTeacher, mClassTimesList);
 
         // Save to Firebase database
         mDatabaseReference.child(mTitle).setValue(schoolClass);
-
-        if (mIsEditClass) {
-            mDatabaseReference.child(mOldTitle).removeValue();
-        }
 
         // Close activity
         finish();

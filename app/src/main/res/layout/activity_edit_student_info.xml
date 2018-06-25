@@ -26,6 +26,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
+            android:contentDescription="@string/a_plus_sign_indicating_a_photo_may_be_added"
             android:id="@+id/add_sign_image_view"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -162,6 +163,7 @@
                     tools:text="August 13, 1991" />
 
                 <ImageView
+                    android:contentDescription="@string/a_calendar_image_indicating_a_date_may_chosen"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -255,6 +257,7 @@
                     android:paddingBottom="8dp">
 
                     <TextView
+                        android:id="@+id/edit_student_add_class_image_button"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground"
@@ -268,6 +271,7 @@
                         android:textSize="@dimen/student_edit_text_size" />
 
                     <TextView
+                        android:id="@+id/edit_student_remove_class_image_button"
                         android:layout_marginRight="4dp"
                         android:layout_marginEnd="4dp"
                         android:clickable="true"

@@ -128,6 +128,8 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
 
                     if (mClassObjectList == null || mClassObjectList.size() == 0) {
                         showEmptyTextView();
+                    } else {
+                        mEmptyView.setVisibility(View.GONE);
                     }
                 }
 
@@ -243,7 +245,7 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
             if (!checkNetworkConnectivity()) {
                 mEmptyView.setText(R.string.no_internet_connection);
             } else {
-                mEmptyView.setText(R.string.no_students_found);
+                mEmptyView.setText(R.string.no_classes_found);
             }
         }
     }

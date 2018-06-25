@@ -2,6 +2,9 @@ package com.example.android.classscheduler;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -95,6 +98,8 @@ public class EditStudentInfo extends AppCompatActivity
     // Keys
     public static final String FULL_CLASS_LIST_KEY = "full-class-list-key";
     public static final String CHOSEN_CLASS_LIST_KEY = "chosen-class-list-key";
+    private static final String BIRTHDATE_INSTANCE_STATE_KEY = "birthday-instance-state-key";
+    private static final String CLASS_LIST_INSTANCE_STATE_KEY = "class-list-instance-state-key";
 
     // Fragment related variables
     private android.support.v4.app.FragmentManager mFragmentManager;
@@ -123,6 +128,7 @@ public class EditStudentInfo extends AppCompatActivity
     private Uri mFirebaseStoragePhotoUri;
     private String mTempPhotoPath;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.classscheduler.fileprovider";
+    private StudentPicViewModel mViewModel;
 
     // Boolean to keep track of changes made to student's info
     private boolean mChangesMade = false;
@@ -159,12 +165,18 @@ public class EditStudentInfo extends AppCompatActivity
     RelativeLayout mStudentBirthdateRelativeLayout;
     @BindView(R.id.student_classes_text_view)
     TextView mStudentClassesTextView;
+    @BindView(R.id.edit_student_add_class_image_button)
+    TextView mStudentAddClassView;
+    @BindView(R.id.edit_student_remove_class_image_button)
+    TextView mStudentRemoveClassView;
 
     // OnTouchListener to listen for user touches on Edit Text views. A touch indicates that
     // a change has probably been made to the info.
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+
             mChangesMade = true;
             return false;
         }
@@ -188,6 +200,9 @@ public class EditStudentInfo extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_student_info);
+
+        // Initialize View Model
+        mViewModel = ViewModelProviders.of(this).get(StudentPicViewModel.class);
 
         // Bind the views
         ButterKnife.bind(this);
@@ -229,6 +244,12 @@ public class EditStudentInfo extends AppCompatActivity
             fillInCurrentStudentInfo();
         } else {
             setTitle(getString(R.string.add_student));
+        }
+
+        // If the user has taken a photo, maintain the picture across configuration changes
+        if (mViewModel.studentPicBitmap != null) {
+            studentHasPhoto = true;
+            mAddPhotoView.setImageBitmap(mViewModel.studentPicBitmap);
         }
 
         // Set up the spinner
@@ -444,8 +465,8 @@ public class EditStudentInfo extends AppCompatActivity
 
             try {
                 InputStream inputStream = getContentResolver().openInputStream(data.getData());
-                mBitmap = BitmapFactory.decodeStream(inputStream);
-                mAddPhotoView.setImageBitmap(mBitmap);
+                mViewModel.studentPicBitmap = BitmapFactory.decodeStream(inputStream);
+                mAddPhotoView.setImageBitmap(mViewModel.studentPicBitmap);
                 studentHasPhoto = true;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -453,20 +474,23 @@ public class EditStudentInfo extends AppCompatActivity
 
             // Take new photo
         } else if (requestCode == CAPTURE_PHOTO && resultCode == Activity.RESULT_OK) {
-            mBitmap = BitmapFactory.decodeFile(mTempPhotoPath);
-            mAddPhotoView.setImageBitmap(mBitmap);
+            mViewModel.studentPicBitmap = BitmapFactory.decodeFile(mTempPhotoPath);
+            mAddPhotoView.setImageBitmap(mViewModel.studentPicBitmap);
             studentHasPhoto = true;
         }
         checkIfThereIsStudentPhoto();
     }
 
     // Set listeners on the edit text views and spinner
+    @SuppressLint("ClickableViewAccessibility")
     private void setTouchListeners() {
         mStudentNameEditText.addTextChangedListener(mTextListener);
         mStudentSexSpinner.setOnTouchListener(mTouchListener);
         mStudentBirthdateRelativeLayout.setOnTouchListener(mTouchListener);
         mStudentGradeEditText.addTextChangedListener(mTextListener);
         mAddPhotoView.setOnTouchListener(mTouchListener);
+        mStudentAddClassView.setOnTouchListener(mTouchListener);
+        mStudentRemoveClassView.setOnTouchListener(mTouchListener);
     }
 
     // Helper method for setting up the spinner for choosing a student's sex
@@ -560,7 +584,7 @@ public class EditStudentInfo extends AppCompatActivity
 
         // Save photo to firebase storage
         final StorageReference photoRef = mStudentPhotosStorageReference.child(studentId);
-        photoRef.putBytes(BitmapUtils.bitmapToByteArray(mBitmap)).addOnSuccessListener(
+        photoRef.putBytes(BitmapUtils.bitmapToByteArray(mViewModel.studentPicBitmap)).addOnSuccessListener(
                 new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -596,7 +620,7 @@ public class EditStudentInfo extends AppCompatActivity
         long studentBirthdate = mStudentBirthdate;
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
 
-        if (mBitmap != null) {
+        if (mViewModel.studentPicBitmap != null) {
             // Save photo to Firebase Storage using AsyncTask
             saveStudentPhotoToFirebaseStorage(studentId);
         } else {
@@ -618,7 +642,7 @@ public class EditStudentInfo extends AppCompatActivity
         int studentGrade = Integer.parseInt(mStudentGradeEditText.getText().toString());
         String studentId = mCurrentStudent.getStudentId();
 
-        if (mBitmap != null) {
+        if (mViewModel.studentPicBitmap != null) {
             saveStudentPhotoToFirebaseStorage(studentId);
         } else {
             // Check if the student already has a photo saved
@@ -777,5 +801,33 @@ public class EditStudentInfo extends AppCompatActivity
         mClassPickerFragment.setArguments(bundle);
         // Show the Class Picker DialogFragment
         mClassPickerFragment.show(mFragmentManager, getString(R.string.remove_classes));
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mStudentBirthdate != 0) {
+            outState.putLong(BIRTHDATE_INSTANCE_STATE_KEY, mStudentBirthdate);
+        }
+        if (mChosenClassesList.size() > 0) {
+            outState.putStringArrayList(CLASS_LIST_INSTANCE_STATE_KEY, mChosenClassesList);
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(BIRTHDATE_INSTANCE_STATE_KEY)) {
+                mStudentBirthdate = savedInstanceState.getLong(BIRTHDATE_INSTANCE_STATE_KEY);
+                mStudentBirthdateTextView.setText(DateUtils.convertDateLongToString(mStudentBirthdate));
+            }
+            if (savedInstanceState.containsKey(CLASS_LIST_INSTANCE_STATE_KEY)) {
+                mChosenClassesList = savedInstanceState.getStringArrayList(CLASS_LIST_INSTANCE_STATE_KEY);
+                String classString = TextUtils.join(", ", mChosenClassesList);
+                mStudentClassesTextView.setText(classString);
+                mStudentClassesTextView.setVisibility(View.VISIBLE);
+            }
+        }
     }
 }

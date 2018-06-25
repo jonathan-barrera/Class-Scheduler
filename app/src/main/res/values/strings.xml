@@ -73,4 +73,7 @@
     <string name="no_classes_to_show">No classes to show.</string>
     <string name="no_internet_connection">No internet connection.</string>
     <string name="no_students_found">No students found.</string>
+    <string name="no_classes_found">No classes found.</string>
+    <string name="a_plus_sign_indicating_a_photo_may_be_added">A plus sign indicating a photo may be added.</string>
+    <string name="a_calendar_image_indicating_a_date_may_chosen">A calendar image indicating a date may chosen.</string>
 </resources>
