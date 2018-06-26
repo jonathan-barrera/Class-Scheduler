@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,8 +19,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.classscheduler.model.SchoolClass;
-import com.example.android.classscheduler.model.Student;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,8 +42,8 @@ public class ClassListActivity extends AppCompatActivity implements SchoolClassA
     public static final String CLASS_OBJECT_FIREBASE_KEY = "class-object-key";
 
     // List to hold School Class objects
-    List<SchoolClass> mClassObjectList;
-    List<SchoolClass> mMatchedClassObjectList;
+    private List<SchoolClass> mClassObjectList;
+    private List<SchoolClass> mMatchedClassObjectList;
 
     // Member variables
     private SchoolClassAdapter mAdapter;

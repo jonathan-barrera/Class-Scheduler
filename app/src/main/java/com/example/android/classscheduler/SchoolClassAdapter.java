@@ -1,6 +1,5 @@
 package com.example.android.classscheduler;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -51,7 +50,7 @@ public class SchoolClassAdapter extends RecyclerView.Adapter<SchoolClassAdapter.
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final SchoolClassAdapter.SchoolClassAdapterViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final SchoolClassAdapter.SchoolClassAdapterViewHolder holder, int position) {
         Resources resources = holder.mClassTitleTextView.getContext().getResources();
 
         // Extract information from the SchoolClass object
@@ -71,7 +70,7 @@ public class SchoolClassAdapter extends RecyclerView.Adapter<SchoolClassAdapter.
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onClassSelected(position);
+                mCallback.onClassSelected(holder.getAdapterPosition());
             }
         });
     }
@@ -98,8 +97,7 @@ public class SchoolClassAdapter extends RecyclerView.Adapter<SchoolClassAdapter.
         }
 
         // Once the list has been finalized, turn into one string and return;
-        String scheduleString = TextUtils.join("\n", formattedScheduleList);
-        return scheduleString;
+        return TextUtils.join("\n", formattedScheduleList);
     }
 
     @Override

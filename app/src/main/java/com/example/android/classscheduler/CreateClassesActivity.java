@@ -2,6 +2,7 @@ package com.example.android.classscheduler;
 
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,9 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,6 +39,7 @@ public class CreateClassesActivity extends AppCompatActivity {
 
     // Keys
     private static final String SCHEDULE_LIST_KEY = "schedule-list-key";
+    public static final String CLASS_TITLE_INTENT_KEY = "class-title-intent-key";
 
     // Constants
     public static final int SUNDAY_INT = 1;
@@ -182,7 +182,15 @@ public class CreateClassesActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                // Delete from firebase database
                 mDatabaseReference.child(mTitle).removeValue();
+
+                // Call UpdateRegisterClassesService to remove class from students' class lists
+                Intent intent = new Intent();
+                intent.putExtra(CLASS_TITLE_INTENT_KEY, mTitle);
+                UpdateRegisteredClassesService.enqueueWork(getApplicationContext(), intent);
+
+                // Notify user class has been deleted
                 Toast.makeText(CreateClassesActivity.this, R.string.class_deleted, Toast.LENGTH_SHORT).show();
 
                 finish();

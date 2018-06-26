@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">ClassScheduler</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="students">Students</string>
@@ -34,8 +33,6 @@
     <string name="delete_student_dialog">Are you sure you want to permanently delete this student?</string>
     <string name="return_button">Return</string>
     <string name="student_deleted">Student Deleted</string>
-    <string name="appwidget_text">EXAMPLE</string>
-    <string name="add_widget">Add widget</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="add_student">Add Student</string>
     <string name="error_selecting_photo">Error selecting photo.</string>

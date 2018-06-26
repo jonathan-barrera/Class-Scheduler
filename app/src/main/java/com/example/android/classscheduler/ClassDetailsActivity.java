@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,10 +33,10 @@ import static com.example.android.classscheduler.StudentListActivity.BUNDLE_RECY
 public class ClassDetailsActivity extends AppCompatActivity implements SchoolClassAdapter.onItemClickListener{
 
     // List to hold list of chosen class titles
-    List<String> mChosenClassList;
+    private List<String> mChosenClassList;
 
     // List to hold School Class objects
-    List<SchoolClass> mClassObjectList;
+    private List<SchoolClass> mClassObjectList;
 
     // Views
     @BindView(R.id.class_details_recycler_view)

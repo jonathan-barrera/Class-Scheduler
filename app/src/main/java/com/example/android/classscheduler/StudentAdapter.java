@@ -25,6 +25,7 @@ import static com.example.android.classscheduler.EditStudentInfo.SEX_MALE_INT;
 
 /**
  * Created by jonathanbarrera on 6/18/18.
+ * Recycler view adapter for Student objects
  */
 
 public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHolder> {

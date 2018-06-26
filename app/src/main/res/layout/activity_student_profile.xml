@@ -9,7 +9,7 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/student_profile_picture_view"
@@ -75,6 +75,8 @@
             android:layout_weight="1"
             android:paddingStart="16dp"
             android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingEnd="16dp"
             android:text="@string/name"
             android:textSize="@dimen/label_text_size" />
 
@@ -110,6 +112,8 @@
             android:layout_weight="1"
             android:paddingLeft="16dp"
             android:paddingStart="16dp"
+            android:paddingRight="16dp"
+            android:paddingEnd="16dp"
             android:text="@string/sex"
             android:textSize="@dimen/label_text_size" />
 
@@ -145,6 +149,8 @@
             android:layout_weight="1"
             android:paddingStart="16dp"
             android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingEnd="16dp"
             android:text="@string/birthdate"
             android:textSize="@dimen/label_text_size" />
 
@@ -180,6 +186,8 @@
             android:layout_weight="1"
             android:paddingStart="16dp"
             android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingEnd="16dp"
             android:text="@string/grade"
             android:textSize="@dimen/label_text_size" />
 
@@ -213,6 +221,8 @@
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
             android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingEnd="16dp"
             android:text="@string/classes"
             android:textSize="@dimen/label_text_size" />
 

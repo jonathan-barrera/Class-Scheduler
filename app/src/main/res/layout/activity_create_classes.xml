@@ -28,6 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:paddingLeft="16dp"
                 android:text="@string/title"
                 android:textSize="@dimen/label_text_size" />
@@ -56,7 +57,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/subject"
                 android:textSize="@dimen/label_text_size" />
 
@@ -84,6 +87,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
                 android:paddingLeft="16dp"
                 android:text="@string/teacher"
                 android:textSize="@dimen/label_text_size" />

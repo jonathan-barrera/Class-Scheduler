@@ -1,15 +1,10 @@
 package com.example.android.classscheduler.utils;
 
-import android.app.IntentService;
-
 import com.example.android.classscheduler.CreateClassesActivity;
 
-import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import timber.log.Timber;
 
 /**
  * Created by jonathanbarrera on 6/10/18.
@@ -30,8 +25,7 @@ public class DateUtils {
         int year = Integer.parseInt(dateIntegerStrings[2]);
 
         DateFormatSymbols dateFormatSymbols = new DateFormatSymbols();
-        String dateStringFinal = dateFormatSymbols.getMonths()[month] + " " + day + ", " + year;
-        return dateStringFinal;
+        return dateFormatSymbols.getMonths()[month] + " " + day + ", " + year;
     }
 
     // Helper method for getting the age of a student

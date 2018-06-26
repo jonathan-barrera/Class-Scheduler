@@ -75,6 +75,8 @@
                 android:layout_weight="1"
                 android:paddingStart="16dp"
                 android:paddingLeft="16dp"
+                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/name"
                 android:textSize="@dimen/label_text_size" />
 
@@ -109,6 +111,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
                 android:paddingLeft="16dp"
                 android:text="@string/sex"
                 android:textSize="@dimen/label_text_size" />
@@ -141,6 +145,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:paddingLeft="16dp"
                 android:text="@string/birthdate"
                 android:textSize="@dimen/label_text_size" />
@@ -157,6 +162,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:paddingEnd="4dp"
+                    android:paddingRight="4dp"
                     android:paddingLeft="4dp"
                     android:paddingStart="4dp"
                     android:textSize="@dimen/label_text_size"
@@ -169,6 +176,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
+                    android:paddingLeft="12dp"
+                    android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     android:paddingRight="12dp"
                     android:scaleType="fitEnd"
@@ -198,6 +207,8 @@
                 android:layout_weight="1"
                 android:paddingStart="16dp"
                 android:paddingLeft="16dp"
+                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/grade"
                 android:textSize="@dimen/label_text_size" />
 
@@ -232,6 +243,8 @@
                 android:onClick="openCreateClassesActivity"
                 android:paddingStart="16dp"
                 android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingEnd="16dp"
                 android:text="@string/classes"
                 android:textSize="@dimen/label_text_size" />
 
